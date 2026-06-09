@@ -235,10 +235,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Barlow',sans-serif;font-s
     <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
     <span class="ni-lbl">Artil.</span>
   </div>
-  <div class="ni" onclick="nav('ia')" title="Análise IA">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
-    <span class="ni-lbl">IA</span>
-  </div>
+
 </div>
 
 <div class="main">
@@ -273,47 +270,6 @@ body{background:var(--bg);color:var(--tx);font-family:'Barlow',sans-serif;font-s
   <div class="ph"><div class="ph-title">Jogos & Análise</div><div class="ph-sub">todos os resultados + leitura trader</div></div>
   <div class="tabs" id="jtabs"></div>
   <div id="jcontent"></div>
-</div>
-
-<!-- ══ IA ANÁLISE ══ -->
-<div id="pg-ia" class="pg">
-  <div class="ph"><div class="ph-title">Análise IA</div><div class="ph-sub">gerada com base nos resultados reais da Copa</div></div>
-
-  <!-- API Key config -->
-  <div id="ia-apikey-box" style="background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r8);padding:14px 18px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
-    <div style="flex:1">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Chave de API Anthropic</div>
-      <div style="font-size:11px;color:var(--tx3)">Necessária para gerar análises. Obtenha em <span style="color:var(--acc)">console.anthropic.com</span> → API Keys. Salva localmente no seu Chrome.</div>
-    </div>
-    <input id="ia-apikey" type="password" class="finp" style="width:320px;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:12px" placeholder="sk-ant-...">
-    <button onclick="salvarApiKey()" style="background:var(--s3);color:var(--tx2);border:1px solid var(--bd2);border-radius:var(--r4);padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0">Salvar</button>
-  </div>
-
-  <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
-    <div style="flex:1;font-size:12px;color:var(--tx2);line-height:1.6">
-      Selecione o jogo. A IA considera todos os resultados registrados, classificação atual e gera leitura de trader com mercados específicos.
-    </div>
-    <select id="ia-jogo-sel" class="finp" style="width:300px;flex-shrink:0">
-      <option value="">— selecione o jogo —</option>
-    </select>
-    <button onclick="gerarAnaliseIA()" id="ia-btn" style="background:var(--acc);color:#080a0e;border:none;border-radius:var(--r6);padding:9px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;white-space:nowrap;flex-shrink:0">Analisar</button>
-  </div>
-
-  <div id="ia-resultado" style="display:none">
-    <div style="background:var(--s2);border:1px solid var(--acc-glow);border-left:3px solid var(--acc);border-radius:var(--r8);padding:18px 20px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <div id="ia-jogo-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;color:var(--acc);text-transform:uppercase;letter-spacing:.04em"></div>
-        <div style="font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace" id="ia-timestamp"></div>
-      </div>
-      <div id="ia-texto"></div>
-    </div>
-  </div>
-
-  <div id="ia-loading" style="display:none;text-align:center;padding:40px">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:var(--acc);letter-spacing:.06em;text-transform:uppercase;animation:pulse 1.2s ease-in-out infinite">Analisando...</div>
-  </div>
-
-  <div id="ia-historico" style="margin-top:20px"></div>
 </div>
 
 <!-- ══ ARTILHEIROS ══ -->
@@ -592,7 +548,6 @@ function render(id){
   if(id==='grupos')renderGrupos();
   if(id==='jogos')renderJogos();
   if(id==='art')renderArt();
-  if(id==='ia')renderIA();
 }
 
 // ----------------------------------------
@@ -950,221 +905,6 @@ function renderJogos(){
 // ----------------------------------------
 let iaHistorico = [];
 
-function formatarAnaliseIA(texto){
-  if(!texto) return '';
-  // Limpar markdown
-  let t=texto;
-  // Processar linha por linha
-  const lines=t.split('\n');
-  let html='';
-  let inMercados=false;
-
-  for(let i=0;i<lines.length;i++){
-    let l=lines[i].trim();
-    if(!l){html+='<div style="height:6px"></div>';continue;}
-
-    // Remove ** bold markers para processar
-    const boldClean=l.replace(/\*\*([^*]+)\*\*/g,'$1');
-
-    // TÍTULO DE SEÇÃO (## ou linha em caps)
-    if(l.startsWith('##')||l.startsWith('**ANÁLISE')||l.startsWith('**MERCADOS')){
-      const title=boldClean.replace(/^#+\s*/,'').replace(/:/,'').trim();
-      inMercados=title.toUpperCase().includes('MERCADO');
-      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;color:var(--acc);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 6px;border-bottom:1px solid var(--bd);padding-bottom:4px">${title}</div>`;
-      continue;
-    }
-
-    // MERCADOS NUMERADOS (1. **LAY...**)
-    const mercMatch=l.match(/^(\d+)\.\s+\*\*([^*]+)\*\*(.*)$/);
-    if(mercMatch||(/^(\d+)\./.test(l)&&(l.toLowerCase().includes('lay')||l.toLowerCase().includes('back')||l.toLowerCase().includes('over')||l.toLowerCase().includes('under')||l.toLowerCase().includes('btts')||l.toLowerCase().includes('handi')))){
-      const full=boldClean.replace(/^\d+\.\s*/,'');
-      const parts=full.split(' - ');
-      const mercName=parts[0].trim();
-      const desc=parts.slice(1).join(' - ').trim();
-      // Detectar se tem odd (@X.XX)
-      const oddMatch=mercName.match(/@([\d.]+)/);
-      const oddVal=oddMatch?oddMatch[1]:'';
-      const mercLabel=mercName.replace(/@[\d.]+/,'').trim();
-      // Cor por tipo
-      const isLay=mercLabel.toUpperCase().includes('LAY');
-      const isBack=mercLabel.toUpperCase().includes('BACK');
-      const cor=isLay?'var(--red)':isBack?'var(--grn)':'var(--acc)';
-      const bgCor=isLay?'rgba(245,70,61,.08)':isBack?'rgba(34,217,122,.08)':'rgba(200,241,53,.06)';
-      // Detectar confiança
-      const confMatch=desc.match(/confiança[:\s]+(alto|médio|baixo)/i);
-      const conf=confMatch?confMatch[1].toLowerCase():'';
-      const confCor=conf==='alto'?'var(--grn)':conf==='médio'?'var(--acc3)':'var(--tx3)';
-      html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${bgCor};border:1px solid ${cor}22;border-left:3px solid ${cor};border-radius:5px;margin-bottom:5px">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:${cor};text-transform:uppercase;flex-shrink:0">${mercLabel}</span>
-        ${oddVal?`<span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:${cor};background:${cor}22;border-radius:4px;padding:1px 8px;flex-shrink:0">@${oddVal}</span>`:''}
-        ${desc?`<span style="font-size:13px;color:var(--tx2);flex:1">${desc.replace(/confiança[:\s]+(alto|médio|baixo)/i,'').trim()}</span>`:''}
-        ${conf?`<span style="font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:${confCor};background:${confCor}22;border-radius:3px;padding:2px 7px;flex-shrink:0">${conf}</span>`:''}
-      </div>`;
-      continue;
-    }
-
-    // PLACAR SUGERIDO
-    if(l.toLowerCase().includes('placar')||l.toLowerCase().includes('resultado esperado')||l.toLowerCase().includes('previsão:')){
-      const clean=boldClean.replace(/^[-•]\s*/,'');
-      html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(61,157,245,.08);border:1px solid rgba(61,157,245,.2);border-radius:5px;margin-bottom:5px">
-        <span style="font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--blu)">Placar</span>
-        <span style="font-size:13px;color:var(--tx)">${clean}</span>
-      </div>`;
-      continue;
-    }
-
-    // NÍVEL DE CONFIANÇA GERAL
-    if(l.toLowerCase().includes('nível de confiança')||l.toLowerCase().includes('nivel de confianca')){
-      const clean=boldClean.replace(/^[-•]\s*/,'');
-      const isAlto=clean.toLowerCase().includes('alto');
-      const isMed=clean.toLowerCase().includes('médio')||clean.toLowerCase().includes('medio');
-      const cor=isAlto?'var(--grn)':isMed?'var(--acc3)':'var(--tx3)';
-      html+=`<div style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:${cor}15;border:1px solid ${cor}33;border-radius:5px;margin-top:8px">
-        <span style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;color:${cor}">${clean}</span>
-      </div>`;
-      continue;
-    }
-
-    // ODDS COM VALOR (linha com @ e "valor" ou "inflada")
-    if(l.includes('@')&&(l.toLowerCase().includes('valor')||l.toLowerCase().includes('inflad')||l.toLowerCase().includes('value'))){
-      const clean=boldClean.replace(/^[-•]\s*/,'');
-      html+=`<div style="padding:5px 10px;background:rgba(200,241,53,.06);border-left:2px solid var(--acc);border-radius:3px;font-size:13px;color:var(--acc);margin-bottom:3px">${clean}</div>`;
-      continue;
-    }
-
-    // LINHA NORMAL COM - ou •
-    if(l.startsWith('-')||l.startsWith('•')||l.startsWith('*')){
-      const clean=boldClean.replace(/^[-•*]\s*/,'');
-      html+=`<div style="font-size:13px;color:var(--tx2);padding:3px 0 3px 10px;border-left:1px solid var(--bd2)">${clean}</div>`;
-      continue;
-    }
-
-    // TEXTO NORMAL
-    const clean=boldClean;
-    html+=`<div style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:3px">${clean}</div>`;
-  }
-
-  return html;
-}
-
-function renderIA(){
-  const sel=document.getElementById('ia-jogo-sel');
-  const pendentes=JOGOS.filter(j=>!S.results[j.id]).sort((a,b)=>a.date.localeCompare(b.date)||a.brt.localeCompare(b.brt));
-  sel.innerHTML='<option value="">— selecione o jogo —</option>'+
-    pendentes.map(j=>`<option value="${j.id}">${fmtDay(j.date)} ${j.brt} · ${j.home} vs ${j.away} (G${j.g})</option>`).join('');
-  // Carregar API key salva
-  const savedKey=localStorage.getItem('copa26_apikey')||'';
-  const keyInput=document.getElementById('ia-apikey');
-  if(keyInput) keyInput.value=savedKey;
-  const keyBox=document.getElementById('ia-apikey-box');
-  if(keyBox) keyBox.style.borderColor=savedKey?'rgba(200,241,53,.2)':'rgba(245,70,61,.3)';
-  renderIAHistorico();
-}
-function salvarApiKey(){
-  const key=document.getElementById('ia-apikey').value.trim();
-  if(!key){alert('Cola a API key primeiro.');return;}
-  localStorage.setItem('copa26_apikey',key);
-  showToast('API key salva!');
-  document.getElementById('ia-apikey-box').style.borderColor='rgba(200,241,53,.2)';
-}
-
-function renderIAHistorico(){
-  const el=document.getElementById('ia-historico');
-  if(!iaHistorico.length){el.innerHTML='';return;}
-  el.innerHTML=iaHistorico.slice().reverse().map(h=>`
-    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:14px 18px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--tx);text-transform:uppercase">${h.titulo}</div>
-        <div style="font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace">${h.ts}</div>
-      </div>
-      <div style="font-size:12px;color:var(--tx2);line-height:1.7">${formatarAnaliseIA(h.texto)}</div>
-    </div>
-  `).join('');
-}
-
-async function gerarAnaliseIA(){
-  const sel=document.getElementById('ia-jogo-sel');
-  const jogoId=sel.value;
-  if(!jogoId){alert('Selecione um jogo primeiro.');return;}
-  const jogo=JOGOS.find(j=>j.id===jogoId);
-  if(!jogo)return;
-
-  const stGrupo=calcSt(jogo.g);
-  const tabelaGrupo=stGrupo.map((t,i)=>`${i+1}. ${t.name}: ${t.pts}pts J${t.j} V${t.v} E${t.e} D${t.d} SG${t.sg>=0?'+'+t.sg:t.sg}`).join('\n');
-  const resultadosGrupo=JOGOS.filter(j=>j.g===jogo.g&&S.results[j.id]).map(j=>{
-    const r=S.results[j.id];
-    return j.home+' '+r.sh+'x'+r.sa+' '+j.away+(r.obs?' — "'+r.obs+'"':'');
-  }).join('\n');
-  const topArtilheiros=Object.entries(S.scorers).map(([n,d])=>({name:n,...d})).filter(p=>p.gols>0).sort((a,b)=>b.gols-a.gols).slice(0,5).map(p=>p.name+' ('+p.team+') '+p.gols+'G').join(', ');
-
-  const prompt='Você é Leozera, o maior trader esportivo do Brasil, especialista em futebol.\n\n'
-    +'JOGO: '+jogo.home+' vs '+jogo.away+'\n'
-    +'Grupo '+jogo.g+' | Rodada '+jogo.rd+' | '+fmtDay(jogo.date)+' às '+jogo.brt+' (Brasília)\n'
-    +'Estádio: '+jogo.est+', '+jogo.city+'\n'
-    +'Odds: Casa '+jogo.odds.h+' | Empate '+jogo.odds.e+' | Fora '+jogo.odds.a+'\n\n'
-    +'CLASSIFICAÇÃO ATUAL DO GRUPO '+jogo.g+':\n'+tabelaGrupo+'\n\n'
-    +(resultadosGrupo?'RESULTADOS JÁ REALIZADOS NO GRUPO:\n'+resultadosGrupo+'\n\n':'')
-    +(topArtilheiros?'TOP ARTILHEIROS: '+topArtilheiros+'\n\n':'')
-    +'Com base nesses dados reais, gere uma análise de trader profissional com:\n'
-    +'1. Momento atual de cada time (quem está bem, quem está sob pressão)\n'
-    +'2. O que está em jogo na classificação\n'
-    +'3. Onde está o valor nas odds (o mercado está certo ou errado?)\n'
-    +'4. 3 a 5 mercados para entrar: Back, Lay, Over, Under, BTTS, Handicap, Over HT, Escanteios\n'
-    +'5. Nível de confiança: alto / médio / baixo\n\n'
-    +'Estruture EXATAMENTE assim:\n'
-    +'## MOMENTO DOS TIMES\n'
-    +'## O QUE ESTÁ EM JOGO\n'
-    +'## ANÁLISE DAS ODDS\n'
-    +'## MERCADOS PARA ENTRAR\n'
-    +'(numere cada mercado: 1. **BACK/LAY + mercado @odd** - descrição - confiança: alto/médio/baixo)\n'
-    +'## PLACAR SUGERIDO\n'
-    +'(ex: Placar: Brasil 2x0 Escócia)\n'
-    +'## NÍVEL DE CONFIANÇA GERAL\n'
-    +'(alto/médio/baixo)\n\n'
-    +'Sem texto extra fora dessas seções. Direto, técnico, sem enrolação.';
-
-  document.getElementById('ia-loading').style.display='block';
-  document.getElementById('ia-resultado').style.display='none';
-  document.getElementById('ia-btn').disabled=true;
-  document.getElementById('ia-btn').textContent='Analisando...';
-
-  try{
-    const apiKey=localStorage.getItem('copa26_apikey')||'';
-    if(!apiKey){
-      alert('Configure sua API key Anthropic na aba IA antes de analisar.');
-      document.getElementById('ia-loading').style.display='none';
-      document.getElementById('ia-btn').disabled=false;
-      document.getElementById('ia-btn').textContent='Analisar';
-      return;
-    }
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-    const data=await resp.json();
-    const texto=data.content&&data.content[0]?data.content[0].text:'Erro ao gerar análise.';
-    const titulo=jogo.home+' vs '+jogo.away;
-    const ts=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-    iaHistorico.push({titulo,ts,texto});
-    // Mostrar apenas no histórico — evita duplicação
-    document.getElementById('ia-resultado').style.display='none';
-    renderIAHistorico();
-    // Scroll para o resultado
-    document.getElementById('ia-historico').scrollIntoView({behavior:'smooth'});
-  }catch(err){
-    document.getElementById('ia-texto').textContent='Erro: '+err.message;
-    document.getElementById('ia-resultado').style.display='block';
-  }finally{
-    document.getElementById('ia-loading').style.display='none';
-    document.getElementById('ia-btn').disabled=false;
-    document.getElementById('ia-btn').textContent='Analisar';
-  }
-}
 
 function renderArt(){
   const sc=Object.entries(S.scorers).map(([n,d])=>({name:n,...d})).filter(p=>p.gols>0).sort((a,b)=>b.gols-a.gols||b.assists-a.assists||a.name.localeCompare(b.name)).slice(0,30);
