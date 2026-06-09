@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copa do Mundo | L10</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Barlow:wght@300;400;500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080a0e;--s1:#0e1118;--s2:#141820;--s3:#1c2230;
+  --bd:#ffffff0d;--bd2:#ffffff16;--bd3:#ffffff22;
+  --acc:#b8ff2e;--acc-d:#8fd400;--acc-dim:#b8ff2e1a;--acc-glow:#b8ff2e33;
+  --blu:#3d9df5;--blu-d:#1a7dd4;
+  --grn:#22d97a;--grn-d:#18a85e;
+  --red:#f54646;--red-d:#c43030;
+  --amb:#f5a623;--amb-d:#c47f10;
+  --tx:#edf0f8;--tx2:#9aa5c0;--tx3:#5a6480;--tx4:#2d3348;
+  --r4:4px;--r6:6px;--r8:8px;--r12:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font-family:'Barlow',sans-serif;font-size:14px;line-height:1.4;overflow-x:hidden}
+
+/* ── TOPBAR ─────────────────────────────── */
+.topbar{height:52px;background:var(--s1);border-bottom:1px solid var(--bd2);display:flex;align-items:center;padding:0 20px;gap:16px;position:sticky;top:0;z-index:50}
+.brand{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;letter-spacing:.06em;color:var(--acc);white-space:nowrap;text-transform:uppercase}
+.brand span{color:var(--tx);opacity:.5;font-weight:300;margin:0 6px}
+.top-divider{width:1px;height:24px;background:var(--bd2);margin:0 4px}
+.top-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--tx3);letter-spacing:.04em}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.cal-badge{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--acc);background:var(--acc-dim);border:1px solid var(--acc-glow);border-radius:var(--r4);padding:3px 8px}
+
+/* ── SHELL ───────────────────────────────── */
+.shell{display:flex;height:calc(100vh - 52px)}
+
+/* ── SIDEBAR ─────────────────────────────── */
+.sb{width:56px;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px;overflow:hidden;flex-shrink:0}
+.ni{width:40px;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border-radius:var(--r8);color:var(--tx3);transition:all .15s;border:1px solid transparent}
+.ni:hover{color:var(--tx2);background:var(--s3)}
+.ni.on{color:var(--acc);background:var(--acc-dim);border-color:var(--acc-glow)}
+.ni svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ni-lbl{font-size:8px;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+
+/* ── MAIN ─────────────────────────────────── */
+.main{flex:1;overflow-y:auto;overflow-x:hidden}
+.pg{display:none;padding:20px 28px}.pg.on{display:block}
+
+/* ── PAGE HEADER ─────────────────────────── */
+.ph{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
+.ph-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;letter-spacing:.04em;text-transform:uppercase;color:var(--acc)}
+.ph-sub{font-size:12px;color:var(--tx3);font-family:'Barlow Condensed',sans-serif;font-weight:400;letter-spacing:.04em;text-transform:uppercase}
+
+/* ── METRIC STRIP ─────────────────────────── */
+.mstrip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+.mcard{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:10px 14px;display:flex;flex-direction:column;gap:3px}
+.mc-l{font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.mc-v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600}
+.c-acc{color:var(--acc)}.c-grn{color:var(--grn)}.c-red{color:var(--red)}.c-amb{color:var(--amb)}.c-blu{color:var(--blu)}
+
+/* ── DAY DIVIDER ─────────────────────────── */
+.day-div{display:flex;align-items:center;gap:10px;margin:14px 0 8px}
+.day-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx);white-space:nowrap}
+.day-line{flex:1;height:1px;background:linear-gradient(90deg,var(--bd2),transparent)}
+.day-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--acc);background:var(--acc-dim);border:1px solid var(--acc-glow);border-radius:var(--r4);padding:2px 7px}
+
+/* ── MATCH CARD ─────────────────────────── */
+.mc{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);margin-bottom:4px;transition:border-color .15s;overflow:hidden}
+.mc:hover{border-color:var(--bd3)}
+.mc.done{border-left:2px solid var(--grn)}
+.mc.val{border-left:2px solid var(--acc)}
+
+/* TOP ROW — placar/horário */
+.mc-top{display:grid;grid-template-columns:180px 1fr 200px;align-items:center;padding:0;min-height:54px}
+.mc-left{display:flex;flex-direction:column;justify-content:center;gap:3px;padding:9px 14px;border-right:1px solid var(--bd)}.mc-badge{display:flex;align-items:center;gap:5px}
+.mc-badge-g{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:var(--tx3);letter-spacing:.06em;text-transform:uppercase}
+.mc-badge-r{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--tx4);background:var(--s3);border-radius:3px;padding:1px 4px}
+
+/* team block */
+.flag{width:24px;height:18px;border-radius:2px;object-fit:cover;background:var(--s3);flex-shrink:0}
+.tname{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:19px;letter-spacing:.02em;text-transform:uppercase;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tname.dim{color:var(--tx3)}
+
+/* score block */
+.sc-live{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:var(--acc);letter-spacing:.04em;line-height:1}
+.sc-time{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:#c89040;line-height:1}
+.sc-prev{font-family:'JetBrains Mono',monospace;font-size:10px;color:#8a9abf;line-height:1;margin-top:2px;letter-spacing:.02em}
+
+/* right meta */
+.mc-city{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--tx);letter-spacing:.03em;text-align:right}.mc-left-g{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;color:var(--tx2);letter-spacing:.06em;text-transform:uppercase}.mc-left-r{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--tx2);background:var(--s3);border:1px solid var(--bd2);border-radius:3px;padding:1px 5px;display:inline-block;margin-left:4px}
+.mc-est{font-size:10px;color:var(--tx2);text-align:right;margin-top:1px}
+.mc-actions{display:flex;gap:5px;margin-top:3px}
+
+/* BTNS */
+.btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;border-radius:var(--r4);padding:5px 12px;cursor:pointer;transition:all .12s;border:1px solid transparent;white-space:nowrap}
+.btn-reg{background:var(--acc-dim);color:var(--acc);border-color:var(--acc-glow)}
+.btn-reg:hover{background:var(--acc);color:#080a0e}
+.btn-done{background:rgba(34,217,122,.08);color:var(--grn);border-color:rgba(34,217,122,.2)}
+.btn-done:hover{background:rgba(34,217,122,.15)}
+.btn-ana{background:transparent;color:var(--tx3);border-color:var(--bd2)}
+.btn-ana:hover{color:var(--tx2);border-color:var(--bd3)}
+.btn-sm{font-size:10px;padding:3px 8px}
+
+/* ANA PANEL */
+.mc-ana{display:none}
+.mc-ana.open{display:none}
+
+/* ANA GRID: texto | odds | mercados | % */
+.ana-grid{display:grid;grid-template-columns:1fr 220px;gap:16px;align-items:start;width:100%}.ana-right{display:flex;flex-direction:column;gap:10px}
+.ana-txt{font-size:13px;color:var(--tx2);line-height:1.7}
+.ana-obs{font-size:11px;color:var(--tx3);font-style:italic;margin-top:5px;padding-top:5px;border-top:1px solid var(--bd)}
+
+/* ODDS */
+.odds-block{display:flex;flex-direction:column;gap:5px}
+.odds-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:var(--acc);letter-spacing:.09em;text-transform:uppercase;margin-bottom:4px}
+.odd-row{display:flex;align-items:center;gap:6px}
+.odd-lbl{font-size:10px;color:var(--tx);width:32px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase}
+.odd-bar-bg{flex:1;height:3px;background:var(--s3);border-radius:2px;overflow:hidden}
+.odd-bar-fill{height:100%;border-radius:2px;transition:width .4s ease}
+.odd-pct{font-family:'JetBrains Mono',monospace;font-size:10px;width:28px;text-align:right;color:var(--tx2)}
+.odd-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:var(--tx);width:28px;text-align:right;flex-shrink:0}
+
+/* MERCADOS */
+.merc-block{display:flex;flex-direction:column;gap:4px}
+.merc-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:var(--acc);letter-spacing:.09em;text-transform:uppercase;margin-bottom:4px}
+.merc-pill{display:inline-flex;align-items:center;gap:3px;background:var(--s3);border:1px solid var(--bd2);border-radius:3px;padding:2px 6px;font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.03em;color:var(--tx2);cursor:default;white-space:nowrap}
+.merc-pill.main{background:var(--acc-dim);border-color:var(--acc-glow);color:var(--acc)}
+.merc-pill.alt{background:rgba(61,157,245,.08);border-color:rgba(61,157,245,.2);color:var(--blu)}
+.merc-pill.cau{background:rgba(245,70,70,.06);border-color:rgba(245,70,70,.18);color:var(--red)}
+.merc-pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.7}
+.merc-pills{display:flex;flex-wrap:wrap;gap:4px}
+
+/* CALIBRAGEM */
+.dev-block{display:flex;flex-direction:column;gap:5px}
+.dev-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.dev-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px}
+.dev-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--tx3);text-transform:uppercase;font-size:10px;letter-spacing:.04em}
+.dev-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:var(--tx)}
+.dtag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.04em;border-radius:3px;padding:2px 7px;text-transform:uppercase}
+.dtag.c{background:rgba(34,217,122,.08);color:var(--grn);border:1px solid rgba(34,217,122,.2)}
+.dtag.z{background:rgba(245,70,70,.08);color:var(--red);border:1px solid rgba(245,70,70,.2)}
+.dtag.p{background:rgba(245,166,35,.08);color:var(--amb);border:1px solid rgba(245,166,35,.2)}
+.vtag{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;background:var(--acc-dim);color:var(--acc);border:1px solid var(--acc-glow);border-radius:3px;padding:1px 6px;text-transform:uppercase;letter-spacing:.05em}
+
+/* ── GROUP TABLE ─────────────────────────── */
+.gtab-wrap{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r12);overflow:hidden;margin-bottom:14px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:8px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);border-bottom:1px solid var(--bd);text-align:left}
+.tbl th.c,.tbl td.c{text-align:center}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--bd);vertical-align:middle;color:var(--tx)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.mo{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:center}
+.tc{display:flex;align-items:center;gap:8px}
+.pos-1,.pos-2{color:var(--grn)}.pos-3{color:var(--amb)}.pos-4{color:var(--tx4)}
+.pbadge{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.03em;margin-left:4px}
+.pb1,.pb2{background:rgba(34,217,122,.1);color:var(--grn)}
+.pb3{background:rgba(245,166,35,.1);color:var(--amb)}
+.pb4{background:rgba(245,70,61,.08);color:var(--red);border:1px solid rgba(245,70,61,.15)}
+
+/* ── TABS ─────────────────────────────────── */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+.tab{padding:5px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--bd2);border-radius:var(--r4);background:transparent;color:var(--tx3);cursor:pointer;transition:all .1s}
+.tab.on{background:var(--acc-dim);border-color:var(--acc-glow);color:var(--acc)}
+.tab:hover:not(.on){color:var(--tx2);background:var(--s3)}
+
+/* ── ARTILHEIROS ─────────────────────────── */
+.rank-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rank-card{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r12);padding:18px 22px}
+.rank-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx);margin-bottom:14px;border-bottom:1px solid var(--bd);padding-bottom:10px}
+.rrow{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--bd)}
+.rrow:last-child{border-bottom:none}
+.rn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--tx4);width:16px;text-align:center;flex-shrink:0}
+.rn.top{color:var(--acc)}
+.rv{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--acc)}
+
+/* ── MODAL ───────────────────────────────── */
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.mbg.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--bd3);border-radius:var(--r12);padding:24px 28px;width:600px;max-width:96vw;max-height:92vh;overflow-y:auto}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;text-transform:uppercase;letter-spacing:.04em;color:var(--acc);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.flbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:4px;display:block}
+.finp{width:100%;background:var(--s3);border:1px solid var(--bd2);border-radius:var(--r6);padding:9px 12px;color:var(--tx);font-family:'Barlow',sans-serif;font-size:13px;outline:none;transition:border-color .12s}
+.finp:focus{border-color:var(--acc-glow);box-shadow:0 0 0 2px var(--acc-dim)}
+.frow{margin-bottom:12px}
+.frow2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.gi{display:grid;grid-template-columns:110px 1fr 1fr 60px 36px;gap:6px;margin-bottom:5px;align-items:center}.gi-hdr{display:grid;grid-template-columns:110px 1fr 1fr 60px 36px;gap:6px;margin-bottom:3px}
+.add-g{background:transparent;border:1px dashed var(--bd2);border-radius:var(--r6);color:var(--tx3);cursor:pointer;padding:7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:100%;text-align:center;transition:all .1s;margin-top:4px}
+.add-g:hover{border-color:var(--acc-glow);color:var(--acc)}
+.rm-g{background:rgba(245,70,70,.1);border:1px solid rgba(245,70,70,.2);color:var(--red);border-radius:var(--r4);cursor:pointer;padding:6px;font-size:13px;line-height:1;font-family:'Barlow',sans-serif}
+.rm-g:hover{background:rgba(245,70,70,.2)}
+.fbtn{background:var(--acc);color:#080a0e;border:none;border-radius:var(--r6);padding:10px 22px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;transition:opacity .1s}
+.fbtn:hover{opacity:.88}
+.fbtn2{background:transparent;color:var(--tx3);border:1px solid var(--bd2);border-radius:var(--r6);padding:10px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;margin-left:8px;transition:all .1s}
+.fbtn2:hover{color:var(--tx2)}
+.fbtns{display:flex;align-items:center;margin-top:16px}
+
+/* ── TOAST ───────────────────────────────── */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--acc);color:#080a0e;border-radius:var(--r6);padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.06em;z-index:999;opacity:0;transform:translateY(10px);transition:all .18s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ── SCROLL ──────────────────────────────── */
+.main::-webkit-scrollbar{width:4px}.main::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">Copa do Mundo<span>|</span>L10</div>
+  <div class="top-divider"></div>
+  <div class="top-date" id="top-date"></div>
+  <div class="top-right">
+    <div class="cal-badge" id="top-badge">0/72 jogos</div>
+  </div>
+</div>
+
+<div class="shell">
+
+<!-- SIDEBAR -->
+<div class="sb">
+  <div class="ni on" onclick="nav('dash')" title="Dashboard">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span class="ni-lbl">Dash</span>
+  </div>
+  <div class="ni" onclick="nav('grupos')" title="Grupos">
+    <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="7" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="7" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="7" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>
+    <span class="ni-lbl">Grupos</span>
+  </div>
+  <div class="ni" onclick="nav('jogos')" title="Jogos">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+    <span class="ni-lbl">Jogos</span>
+  </div>
+  <div class="ni" onclick="nav('art')" title="Artilheiros">
+    <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    <span class="ni-lbl">Artil.</span>
+  </div>
+  <div class="ni" onclick="nav('ia')" title="Análise IA">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+    <span class="ni-lbl">IA</span>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══ DASHBOARD ══ -->
+<div id="pg-dash" class="pg on">
+  <div class="ph"><div class="ph-title">Dashboard</div><div class="ph-sub" id="dash-sub" style="font-size:12px;color:var(--tx3)"></div><span id="dash-cal-rate" style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--acc2);margin-left:8px"></span><button onclick="resetAll()" style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;background:rgba(245,70,61,.08);color:var(--red);border:1px solid rgba(245,70,61,.2);border-radius:4px;padding:4px 12px;cursor:pointer">Resetar dados</button></div>
+  <div class="mstrip" id="dash-met"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:14px 18px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Artilheiros — top 5</div>
+      <div id="dash-art"></div>
+    </div>
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:14px 18px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Calibragem trader</div>
+      <div id="dash-cal"></div>
+    </div>
+  </div>
+  <div id="dash-today-sec"></div>
+  <div id="dash-next-sec"></div>
+</div>
+
+<!-- ══ GRUPOS ══ -->
+<div id="pg-grupos" class="pg">
+  <div class="ph"><div class="ph-title">Grupos</div><div class="ph-sub">tabelas ao vivo</div></div>
+  <div class="tabs" id="gtabs"></div>
+  <div id="gcontent"></div>
+</div>
+
+<!-- ══ JOGOS + ANÁLISE ══ -->
+<div id="pg-jogos" class="pg">
+  <div class="ph"><div class="ph-title">Jogos & Análise</div><div class="ph-sub">todos os resultados + leitura trader</div></div>
+  <div class="tabs" id="jtabs"></div>
+  <div id="jcontent"></div>
+</div>
+
+<!-- ══ IA ANÁLISE ══ -->
+<div id="pg-ia" class="pg">
+  <div class="ph"><div class="ph-title">Análise IA</div><div class="ph-sub">gerada com base nos resultados reais da Copa</div></div>
+
+  <!-- API Key config -->
+  <div id="ia-apikey-box" style="background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r8);padding:14px 18px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+    <div style="flex:1">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Chave de API Anthropic</div>
+      <div style="font-size:11px;color:var(--tx3)">Necessária para gerar análises. Obtenha em <span style="color:var(--acc)">console.anthropic.com</span> → API Keys. Salva localmente no seu Chrome.</div>
+    </div>
+    <input id="ia-apikey" type="password" class="finp" style="width:320px;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:12px" placeholder="sk-ant-...">
+    <button onclick="salvarApiKey()" style="background:var(--s3);color:var(--tx2);border:1px solid var(--bd2);border-radius:var(--r4);padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0">Salvar</button>
+  </div>
+
+  <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+    <div style="flex:1;font-size:12px;color:var(--tx2);line-height:1.6">
+      Selecione o jogo. A IA considera todos os resultados registrados, classificação atual e gera leitura de trader com mercados específicos.
+    </div>
+    <select id="ia-jogo-sel" class="finp" style="width:300px;flex-shrink:0">
+      <option value="">— selecione o jogo —</option>
+    </select>
+    <button onclick="gerarAnaliseIA()" id="ia-btn" style="background:var(--acc);color:#080a0e;border:none;border-radius:var(--r6);padding:9px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;white-space:nowrap;flex-shrink:0">Analisar</button>
+  </div>
+
+  <div id="ia-resultado" style="display:none">
+    <div style="background:var(--s2);border:1px solid var(--acc-glow);border-left:3px solid var(--acc);border-radius:var(--r8);padding:18px 20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div id="ia-jogo-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;color:var(--acc);text-transform:uppercase;letter-spacing:.04em"></div>
+        <div style="font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace" id="ia-timestamp"></div>
+      </div>
+      <div id="ia-texto"></div>
+    </div>
+  </div>
+
+  <div id="ia-loading" style="display:none;text-align:center;padding:40px">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:var(--acc);letter-spacing:.06em;text-transform:uppercase;animation:pulse 1.2s ease-in-out infinite">Analisando...</div>
+  </div>
+
+  <div id="ia-historico" style="margin-top:20px"></div>
+</div>
+
+<!-- ══ ARTILHEIROS ══ -->
+<div id="pg-art" class="pg">
+  <div class="ph"><div class="ph-title">Artilheiros & Assistências</div><div class="ph-sub">ranking em tempo real</div></div>
+  <div class="rank-grid">
+    <div class="rank-card"><div class="rank-title">Artilheiros</div><div id="rk-g"></div></div>
+    <div class="rank-card"><div class="rank-title">Rei das assistências</div><div id="rk-a"></div></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- MODAL -->
+<div class="mbg" id="mbg">
+  <div class="modal">
+    <div class="modal-title" id="mtit"></div>
+    <div class="frow2">
+      <div><label class="flbl" id="lh">Casa</label><input class="finp" id="sh" type="number" min="0" max="20" value="0"></div>
+      <div><label class="flbl" id="la">Fora</label><input class="finp" id="sa" type="number" min="0" max="20" value="0"></div>
+    </div>
+    <div class="frow">
+      <label class="flbl">Gols</label>
+      <div id="glist"></div>
+      <button class="add-g" onclick="addG()">+ Adicionar Gol</button>
+    </div>
+    <div class="frow">
+      <label class="flbl">Observação trader</label>
+      <textarea class="finp" id="obs" rows="2" placeholder="Movimento de odds, o que chamou atenção..."></textarea>
+    </div>
+    <div class="frow">
+      <label class="flbl">Desvio da previsão</label>
+      <select class="finp" id="dev">
+        <option value="">Selecione...</option>
+        <option value="confirmou">Confirmou — dentro do esperado</option>
+        <option value="parcial">Parcial — uma coisa certa, outra errada</option>
+        <option value="zebra">Zebra — completamente diferente</option>
+      </select>
+    </div>
+    <div class="fbtns">
+      <button class="fbtn" onclick="saveR()">Salvar</button>
+      <button class="fbtn2" onclick="closeM()">Cancelar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ----------------------------------------
+// FLAGS
+// ----------------------------------------
+const FL={
+  'México':'mx','África do Sul':'za','Coreia do Sul':'kr','Rep. Tcheca':'cz',
+  'Canadá':'ca','Bósnia':'ba','Catar':'qa','Suíça':'ch',
+  'Brasil':'br','Marrocos':'ma','Escócia':'gb-sct','Haiti':'ht',
+  'EUA':'us','Austrália':'au','Turquia':'tr','Paraguai':'py',
+  'Alemanha':'de','Costa do Marfim':'ci','Equador':'ec','Curaçao':'cw',
+  'Holanda':'nl','Japão':'jp','Suécia':'se','Tunísia':'tn',
+  'Bélgica':'be','Irã':'ir','Egito':'eg','Nova Zelândia':'nz',
+  'Espanha':'es','Uruguai':'uy','Arábia Saudita':'sa','Cabo Verde':'cv',
+  'França':'fr','Noruega':'no','Senegal':'sn','Iraque':'iq',
+  'Argentina':'ar','Áustria':'at','Argélia':'dz','Jordânia':'jo',
+  'Portugal':'pt','Colômbia':'co','Uzbequistão':'uz','RD Congo':'cd',
+  'Inglaterra':'gb-eng','Croácia':'hr','Gana':'gh','Panamá':'pa'
+};
+function fi(t,w=24,h=18){
+  const c=FL[t];
+  if(!c)return'';
+  // Para Escócia e Inglaterra usar o endpoint correto do flagcdn
+  const url=`https://flagcdn.com/${w}x${h}/${c}.png`;
+  return `<img style="width:${w}px;height:${h}px;border-radius:2px;object-fit:cover;background:#1c2230;flex-shrink:0;display:inline-block" src="${url}" alt="${t}" onerror="this.style.display='none'">`;
+}
+
+// ----------------------------------------
+// DADOS
+// ----------------------------------------
+const GR={
+  A:{t:['México','Coreia do Sul','Rep. Tcheca','África do Sul']},
+  B:{t:['Suíça','Canadá','Bósnia','Catar']},
+  C:{t:['Brasil','Marrocos','Escócia','Haiti']},
+  D:{t:['EUA','Austrália','Turquia','Paraguai']},
+  E:{t:['Alemanha','Costa do Marfim','Equador','Curaçao']},
+  F:{t:['Holanda','Japão','Suécia','Tunísia']},
+  G:{t:['Bélgica','Irã','Egito','Nova Zelândia']},
+  H:{t:['Espanha','Uruguai','Arábia Saudita','Cabo Verde']},
+  I:{t:['França','Noruega','Senegal','Iraque']},
+  J:{t:['Argentina','Áustria','Argélia','Jordânia']},
+  K:{t:['Portugal','Colômbia','Uzbequistão','RD Congo']},
+  L:{t:['Inglaterra','Croácia','Gana','Panamá']}
+};
+
+// mercados sugeridos por jogo
+const MERC={
+  A1:{m:[{t:'Back México',c:'main'},{t:'Over 1.5',c:'alt'},{t:'+7 Escanteios',c:'alt'},{t:'Lay 0-0',c:'cau'}]},
+  A2:{m:[{t:'Lay Empate',c:'cau'},{t:'Empate 1T',c:'main'},{t:'Under 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  A3:{m:[{t:'Back Rep. Tcheca',c:'main'},{t:'Over 1.5',c:'alt'},{t:'Lay África do Sul',c:'cau'}]},
+  A4:{m:[{t:'Back México',c:'main'},{t:'Over HT',c:'alt'},{t:'+8 Escanteios',c:'alt'}]},
+  A5:{m:[{t:'Back Empate',c:'main'},{t:'Under 2.5',c:'alt'},{t:'Lay Goleada',c:'cau'}]},
+  A6:{m:[{t:'Back Coreia -1.5',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  B1:{m:[{t:'Back Canadá',c:'main'},{t:'Over 1.5',c:'alt'},{t:'+7 Escanteios',c:'alt'}]},
+  B2:{m:[{t:'Back Suíça',c:'main'},{t:'Lay Empate',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  B3:{m:[{t:'Back Suíça',c:'main'},{t:'Over 1.5',c:'alt'},{t:'Lay 0-0',c:'cau'}]},
+  B4:{m:[{t:'Back Canadá',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  B5:{m:[{t:'Back Empate',c:'main'},{t:'Under 2.5',c:'alt'},{t:'Lay Canadá',c:'cau'}]},
+  B6:{m:[{t:'Back Bósnia',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  C1:{m:[{t:'Back Brasil',c:'main'},{t:'Over 1.5',c:'alt'},{t:'+8 Escanteios',c:'alt'},{t:'Lay 0x1',c:'cau'}]},
+  C2:{m:[{t:'Back Escócia',c:'main'},{t:'BTTS Não',c:'alt'},{t:'Lay Empate',c:'main'}]},
+  C3:{m:[{t:'Back Marrocos',c:'main'},{t:'Under 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  C4:{m:[{t:'Brasil Handi -2.5',c:'main'},{t:'Over 3.5',c:'alt'},{t:'BTTS Não',c:'alt'},{t:'Over HT',c:'main'}]},
+  C5:{m:[{t:'Back Brasil',c:'main'},{t:'Lay Empate',c:'main'},{t:'Over 1.5',c:'alt'}]},
+  C6:{m:[{t:'Back Marrocos',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  D1:{m:[{t:'Back EUA',c:'main'},{t:'Over 1.5',c:'alt'},{t:'+8 Escanteios',c:'alt'}]},
+  D2:{m:[{t:'Back Turquia',c:'main'},{t:'Lay Austrália',c:'cau'},{t:'Over 1.5',c:'alt'}]},
+  D3:{m:[{t:'Back Turquia',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  D4:{m:[{t:'Back EUA',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  D5:{m:[{t:'Back Empate',c:'main'},{t:'Under 2.5',c:'alt'},{t:'Lay EUA -1',c:'cau'}]},
+  D6:{m:[{t:'Back Austrália',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  E1:{m:[{t:'Alemanha Handi -1.5',c:'main'},{t:'Over 3.5',c:'alt'},{t:'BTTS Não',c:'alt'},{t:'Over HT',c:'main'}]},
+  E2:{m:[{t:'Back Costa do Marfim',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  E3:{m:[{t:'Back Alemanha',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  E4:{m:[{t:'Back Equador',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  E5:{m:[{t:'Alemanha Handi -2.5',c:'main'},{t:'Over 3.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  E6:{m:[{t:'Back Costa do Marfim',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  F1:{m:[{t:'Lay Holanda -1',c:'main'},{t:'Back Empate',c:'alt'},{t:'Japão +0',c:'main'},{t:'Under 2.5',c:'alt'}]},
+  F2:{m:[{t:'Back Suécia',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  F3:{m:[{t:'Back Japão',c:'main'},{t:'Lay Empate',c:'main'},{t:'BTTS Não',c:'alt'}]},
+  F4:{m:[{t:'Back Holanda',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  F5:{m:[{t:'Back Japão',c:'main'},{t:'Lay Empate',c:'main'},{t:'BTTS Não',c:'alt'}]},
+  F6:{m:[{t:'Back Holanda',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  G1:{m:[{t:'Back Empate',c:'main'},{t:'Lay Bélgica',c:'cau'},{t:'Over 1.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  G2:{m:[{t:'Back Irã',c:'main'},{t:'BTTS Não',c:'alt'},{t:'Under 2.5',c:'alt'}]},
+  G3:{m:[{t:'Back Bélgica',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  G4:{m:[{t:'Back Egito',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  G5:{m:[{t:'Back Egito',c:'main'},{t:'Over 1.5',c:'alt'},{t:'Under 3.5',c:'alt'}]},
+  G6:{m:[{t:'Back Bélgica',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  H1:{m:[{t:'Espanha Handi -2',c:'main'},{t:'Over 3.5',c:'alt'},{t:'BTTS Não',c:'alt'},{t:'+9 Escanteios',c:'alt'}]},
+  H2:{m:[{t:'Back Uruguai',c:'main'},{t:'Lay Empate',c:'main'},{t:'BTTS Não',c:'alt'}]},
+  H3:{m:[{t:'Lay Espanha -1',c:'cau'},{t:'Back Empate',c:'alt'},{t:'Under 2.5',c:'alt'}]},
+  H4:{m:[{t:'Back Uruguai',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  H5:{m:[{t:'Back Arábia Saudita',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  H6:{m:[{t:'Back Espanha',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  I1:{m:[{t:'Back França',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Sim',c:'alt'},{t:'+8 Escanteios',c:'alt'}]},
+  I2:{m:[{t:'Back Noruega',c:'main'},{t:'Lay Empate',c:'main'},{t:'BTTS Não',c:'alt'}]},
+  I3:{m:[{t:'Back França',c:'main'},{t:'Over 2.5',c:'alt'},{t:'Over HT',c:'main'}]},
+  I4:{m:[{t:'Back Noruega',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Não',c:'alt'},{t:'Lay Empate',c:'main'}]},
+  I5:{m:[{t:'Noruega +0.5',c:'main'},{t:'Lay França -1',c:'cau'},{t:'BTTS Sim',c:'alt'}]},
+  I6:{m:[{t:'Back Senegal',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  J1:{m:[{t:'Back Áustria',c:'main'},{t:'Under 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  J2:{m:[{t:'Lay Argentina -1.5',c:'cau'},{t:'Back Argentina',c:'main'},{t:'Over 1.5',c:'alt'}]},
+  J3:{m:[{t:'Back Argélia',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  J4:{m:[{t:'Back Empate',c:'main'},{t:'Under 2.5',c:'alt'},{t:'Lay Arg. -1',c:'cau'}]},
+  J5:{m:[{t:'Back Áustria',c:'main'},{t:'Under 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  J6:{m:[{t:'Back Argentina',c:'main'},{t:'Lay Empate',c:'main'},{t:'BTTS Não',c:'alt'}]},
+  K1:{m:[{t:'Portugal Handi -1.5',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'},{t:'Over HT',c:'main'}]},
+  K2:{m:[{t:'Back Colômbia',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  K3:{m:[{t:'Back Portugal',c:'main'},{t:'Lay Empate',c:'main'},{t:'BTTS Não',c:'alt'}]},
+  K4:{m:[{t:'Back Colômbia',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  K5:{m:[{t:'Back Portugal',c:'main'},{t:'BTTS Sim',c:'alt'},{t:'Over 2.5',c:'alt'}]},
+  K6:{m:[{t:'Back Uzbequistão',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  L1:{m:[{t:'Back Inglaterra',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  L2:{m:[{t:'Back Gana',c:'main'},{t:'Over 1.5',c:'alt'},{t:'BTTS Sim',c:'alt'}]},
+  L3:{m:[{t:'Lay Inglaterra -1',c:'cau'},{t:'Back Empate',c:'main'},{t:'Under 2.5',c:'alt'}]},
+  L4:{m:[{t:'Back Croácia',c:'main'},{t:'Lay Empate',c:'main'},{t:'BTTS Não',c:'alt'}]},
+  L5:{m:[{t:'Back Inglaterra',c:'main'},{t:'Over 2.5',c:'alt'},{t:'BTTS Não',c:'alt'}]},
+  L6:{m:[{t:'Back Croácia',c:'main'},{t:'Lay Empate',c:'main'},{t:'BTTS Não',c:'alt'}]},
+};
+
+const JOGOS=[
+  {id:'A1',g:'A',rd:1,home:'México',away:'África do Sul',date:'2026-06-11',brt:'16:00',est:'Estádio Azteca',city:'Cidade do México',sim:'2-0',analise:'México abre a Copa em casa no Azteca com 80 mil torcedores. África do Sul é a seleção africana menos experiente nesta edição — sem estrelas de nível europeu e com defesa frágil no plano alto. México vai pressionar desde o início. Fator altitude de Cidade do México (2.240m) anula qualquer vantagem física do adversário.',val:false,odds:{h:1.60,e:3.80,a:5.50}},
+  {id:'A2',g:'A',rd:1,home:'Coreia do Sul',away:'Rep. Tcheca',date:'2026-06-11',brt:'23:00',est:'Estadio Akron',city:'Guadalajara',sim:'1-1',analise:'Coreia do Sul vs Rep. Tcheca — confronto técnico e equilibrado. Coreia tem velocidade e pressing alto com Son como referência. Tcheca é organizada, joga em bloco médio-baixo e explora bola parada. Coreia domina posse mas Tcheca é perigosa no contragolpe. Jogo com poucos gols, difícil de abrir.',val:false,odds:{h:2.50,e:3.10,a:2.90}},
+  {id:'A3',g:'A',rd:2,home:'Rep. Tcheca',away:'África do Sul',date:'2026-06-18',brt:'13:00',est:'Mercedes-Benz Stadium',city:'Atlanta',sim:'2-1',analise:'Rep. Tcheca joga para se classificar — eliminar a África do Sul é obrigação. Tcheca tem mais qualidade técnica e experiência europeia. África do Sul vai fechar atrás e tentar o contragolpe. Jogo tenso mas Tcheca resolve no 2T.',val:false,odds:{h:1.90,e:3.40,a:4.00}},
+  {id:'A4',g:'A',rd:2,home:'México',away:'Coreia do Sul',date:'2026-06-18',brt:'22:00',est:'Estadio Akron',city:'Guadalajara',sim:'1-0',analise:'México vs Coreia do Sul decide a liderança do grupo. México ainda em casa em Guadalajara, com torcida intensa. Coreia vai pressionar alto e cria perigo em transição. Disputa física, México tem vantagem emocional e territorial.',val:false,odds:{h:2.10,e:3.20,a:3.40}},
+  {id:'A5',g:'A',rd:3,home:'Rep. Tcheca',away:'México',date:'2026-06-24',brt:'22:00',est:'Estadio Azteca',city:'Cidade do México',sim:'1-1',analise:'Ambos já classificados. Tcheca e México vão gerir a energia para o mata-mata. Provável rotação de titulares. Cenário ideal para empate administrado.',val:false,odds:{h:2.00,e:2.90,a:3.50}},
+  {id:'A6',g:'A',rd:3,home:'África do Sul',away:'Coreia do Sul',date:'2026-06-24',brt:'22:00',est:'Estadio BBVA',city:'Monterrey',sim:'0-3',analise:'África do Sul já eliminada, sem nada a perder. Coreia precisa de saldo de gols para brigar pela melhor posição entre os terceiros. Espera-se goleada com Coreia rotacionando mas ainda pressionando.',val:false,odds:{h:6.00,e:4.00,a:1.50}},
+  {id:'B1',g:'B',rd:1,home:'Canadá',away:'Bósnia',date:'2026-06-12',brt:'16:00',est:'BMO Field',city:'Toronto',sim:'2-0',analise:'Canadá estreia em casa no BMO Field, Toronto. Davies é a principal arma — velocidade e qualidade técnica fora do padrão. Bósnia tem qualidade ofensiva com Džeko como referência, mas viagem longa e fuso horário penalizam. Canadá vai pressionar alto desde o início.',val:false,odds:{h:1.80,e:3.30,a:4.20}},
+  {id:'B2',g:'B',rd:1,home:'Catar',away:'Suíça',date:'2026-06-13',brt:'16:00',est:"Levi's Stadium",city:'San Francisco',sim:'0-3',analise:'Catar tende a repetir o fracasso de 2022 — única anfitriã eliminada sem vencer na história. Suíça joga em bloco compacto, sai rápido no contragolpe e é tecnicamente muito superior. Resultado esperado: goleada suíça.',val:false,odds:{h:9.00,e:5.00,a:1.30}},
+  {id:'B3',g:'B',rd:2,home:'Suíça',away:'Bósnia',date:'2026-06-18',brt:'16:00',est:'SoFi Stadium',city:'Los Angeles',sim:'2-1',analise:'Suíça vs Bósnia — confronto europeu equilibrado mas com Suíça favorita. Suíça tem melhor organização tática e jogadores com maior nível de liga (Bayern, Arsenal). Bósnia depende da inspiração de Džeko. Suíça controla e resolve.',val:false,odds:{h:1.70,e:3.50,a:4.50}},
+  {id:'B4',g:'B',rd:2,home:'Canadá',away:'Catar',date:'2026-06-18',brt:'19:00',est:'BC Place',city:'Vancouver',sim:'2-0',analise:'Canadá vs Catar: Catar já matematicamente eliminado ou sem chances reais. Canadá com o apoio da torcida canadense. Resultado tranquilo para os anfitriões.',val:false,odds:{h:1.50,e:4.00,a:7.00}},
+  {id:'B5',g:'B',rd:3,home:'Suíça',away:'Canadá',date:'2026-06-24',brt:'16:00',est:'BC Place',city:'Vancouver',sim:'1-0',analise:'Suíça já classificada como 1ª ou 2ª. Canadá quer o 1º lugar para ter caminho mais fácil no mata-mata. Jogo disputado com Suíça gerindo. Empate serve a ambos se as contas fecharem.',val:true,odds:{h:2.00,e:3.10,a:3.60}},
+  {id:'B6',g:'B',rd:3,home:'Bósnia',away:'Catar',date:'2026-06-24',brt:'16:00',est:'Lumen Field',city:'Seattle',sim:'4-0',analise:'Bósnia vs Catar com Catar eliminado. Bósnia precisa de saldo de gols para brigar pelo 3º lugar. Resultado amplo esperado.',val:false,odds:{h:1.40,e:4.50,a:8.00}},
+  {id:'C1',g:'C',rd:1,home:'Brasil',away:'Marrocos',date:'2026-06-13',brt:'19:00',est:'MetLife Stadium',city:'Nova York/NJ',sim:'2-1',analise:'Brasil de Ancelotti estreia contra o adversário mais perigoso do grupo. Marrocos fechou o Mundial de 2022 na 4ª colocação — organização defensiva de elite, pressing alto e velocidade em transição. Jogo tenso. Brasil precisa de paciência e qualidade na construção. Placar curto, Brasil resolve no 2T.',val:false,odds:{h:1.55,e:3.80,a:5.50}},
+  {id:'C2',g:'C',rd:1,home:'Haiti',away:'Escócia',date:'2026-06-13',brt:'22:00',est:'Gillette Stadium',city:'Boston',sim:'0-2',analise:'Escócia é tecnicamente superior ao Haiti em todos os setores. Jogadores atuando nas principais ligas europeias. Haiti não tem estrutura para competir neste nível. Escócia deve vencer com tranquilidade mas sem estrondosa goleada — foco na gestão.',val:false,odds:{h:7.50,e:4.00,a:1.50}},
+  {id:'C3',g:'C',rd:2,home:'Escócia',away:'Marrocos',date:'2026-06-19',brt:'16:00',est:'Gillette Stadium',city:'Boston',sim:'0-1',analise:'Marrocos precisa dos 3 pontos para garantir a 2ª vaga. Escócia sem chances de classificação, vai fechar o bloco e tentar o contragolpe. Marrocos vai pressionar com pressing alto — estilo que ficou famoso no Qatar 2022. Gol único, jogo feio mas eficiente para os africanos.',val:false,odds:{h:3.40,e:3.20,a:2.10}},
+  {id:'C4',g:'C',rd:2,home:'Brasil',away:'Haiti',date:'2026-06-19',brt:'21:30',est:'Lincoln Financial Field',city:'Philadelphia',sim:'4-0',analise:'Brasil vs Haiti: maior diferença técnica do grupo. Ancelotti vai poupar titulares visando o mata-mata. Mesmo com reservas, qualidade individual do Brasil é superior em todos os setores. Goleada com margem para explorar handicap.',val:true,odds:{h:1.10,e:8.00,a:20.0}},
+  {id:'C5',g:'C',rd:3,home:'Escócia',away:'Brasil',date:'2026-06-24',brt:'19:00',est:'Hard Rock Stadium',city:'Miami',sim:'0-2',analise:'Brasil já classificado como 1º. Ancelotti deve escalar time alternativo. Escócia precisa do resultado para tentar o 3º lugar. Brasil vai administrar sem arriscar. Resultado seguro sem pressão.',val:false,odds:{h:7.00,e:4.20,a:1.45}},
+  {id:'C6',g:'C',rd:3,home:'Marrocos',away:'Haiti',date:'2026-06-24',brt:'19:00',est:'Mercedes-Benz Stadium',city:'Atlanta',sim:'3-0',analise:'Marrocos sela a 2ª colocação. Haiti sem chances. Jogo de treino para os marroquinos que preparam o mata-mata.',val:false,odds:{h:1.30,e:5.50,a:10.0}},
+  {id:'D1',g:'D',rd:1,home:'EUA',away:'Paraguai',date:'2026-06-12',brt:'22:00',est:'SoFi Stadium',city:'Los Angeles',sim:'2-0',analise:'EUA abre em casa em Los Angeles com pressão total — Copa do Mundo no próprio país. Pulisic é o principal criador. Paraguai vai fechar o bloco e tentar o contragolpe. EUA com intensidade física altíssima e pressão da torcida. Resultado natural dos anfitriões.',val:false,odds:{h:1.70,e:3.50,a:4.80}},
+  {id:'D2',g:'D',rd:1,home:'Austrália',away:'Turquia',date:'2026-06-13',brt:'01:00',est:'BC Place',city:'Vancouver',sim:'1-2',analise:'Turquia vs Austrália: Turquia é fisicamente mais forte, raçuda, com Çalhanoğlu controlando o meio. Austrália tem organização e trabalha bem a bola parada. Confronto físico no qual a Turquia leva vantagem nos duelos individuais. Mercado subestima a Turquia.',val:true,odds:{h:3.60,e:3.20,a:2.00}},
+  {id:'D3',g:'D',rd:2,home:'Turquia',away:'Paraguai',date:'2026-06-19',brt:'01:00',est:"Levi's Stadium",city:'San Francisco',sim:'3-1',analise:'Turquia vs Paraguai com Paraguai sem chances de classificação. Turquia motivada para selar a 2ª vaga. Resultado esperado com relativa facilidade.',val:false,odds:{h:1.50,e:3.80,a:6.00}},
+  {id:'D4',g:'D',rd:2,home:'EUA',away:'Austrália',date:'2026-06-19',brt:'16:00',est:'Lumen Field',city:'Seattle',sim:'2-1',analise:'EUA vs Austrália, jogo entre os dois melhores do grupo. EUA leva vantagem da torcida e da familiaridade com os estádios americanos. Austrália é organizada mas inferior individualmente. EUA vence num jogo disputado.',val:false,odds:{h:1.80,e:3.30,a:4.20}},
+  {id:'D5',g:'D',rd:3,home:'Turquia',away:'EUA',date:'2026-06-25',brt:'23:00',est:'SoFi Stadium',city:'Los Angeles',sim:'1-1',analise:'Turquia vs EUA com ambos já classificados. Provável gestão de energia. Empate administrado é o cenário mais lógico para preservar titulares.',val:true,odds:{h:3.50,e:3.10,a:2.00}},
+  {id:'D6',g:'D',rd:3,home:'Paraguai',away:'Austrália',date:'2026-06-25',brt:'23:00',est:"Levi's Stadium",city:'San Francisco',sim:'0-1',analise:'Paraguai vs Austrália. Paraguai eliminado, sem motivação. Austrália pode precisar do resultado dependendo do saldo de gols. Resultado para os australianos.',val:false,odds:{h:4.00,e:3.20,a:1.90}},
+  {id:'E1',g:'E',rd:1,home:'Alemanha',away:'Curaçao',date:'2026-06-14',brt:'14:00',est:'NRG Stadium',city:'Houston',sim:'3-0',analise:'Alemanha vs Curaçao — abismo técnico. Wirtz, Gnabry, Füllkrug contra uma seleção caribenha estreante. Curaçao vai ser goleada — questão é por quantos. Alemanha quer construir saldo de gols desde cedo para o critério de desempate.',val:true,odds:{h:1.15,e:7.00,a:16.0}},
+  {id:'E2',g:'E',rd:1,home:'Costa do Marfim',away:'Equador',date:'2026-06-14',brt:'20:00',est:'Lincoln Financial Field',city:'Philadelphia',sim:'2-1',analise:'Costa do Marfim vs Equador — duelo entre duas seleções de qualidade técnica similar. Costa do Marfim tem mais qualidade individual com Haller e Zaha. Equador é bem organizado com Caicedo no meio. Jogo equilibrado, Costa do Marfim vence por margem mínima.',val:false,odds:{h:2.10,e:3.20,a:3.40}},
+  {id:'E3',g:'E',rd:2,home:'Alemanha',away:'Costa do Marfim',date:'2026-06-20',brt:'17:00',est:'BMO Field',city:'Toronto',sim:'2-1',analise:'Alemanha vs Costa do Marfim — o jogo decisivo do grupo E. Costa do Marfim vai apertar no 1T, tem qualidade para criar problemas. Alemanha é mais completa taticamente. Wirtz e Gnabry decidem quando a pressão marfinense ceder.',val:false,odds:{h:1.60,e:3.80,a:5.00}},
+  {id:'E4',g:'E',rd:2,home:'Equador',away:'Curaçao',date:'2026-06-20',brt:'21:00',est:'Arrowhead Stadium',city:'Kansas City',sim:'3-1',analise:'Equador vs Curaçao: Equador é muito superior. Caicedo lidera o meio e Equador vai construir saldo de gols para a disputa pelo 2º lugar ou melhor 3º.',val:false,odds:{h:1.50,e:4.00,a:6.50}},
+  {id:'E5',g:'E',rd:3,home:'Equador',away:'Alemanha',date:'2026-06-25',brt:'17:00',est:'MetLife Stadium',city:'Nova York/NJ',sim:'0-4',analise:'Alemanha vs Equador com Alemanha já classificada — vai maximizar saldo de gols. Equador tecnicamente inferior. Goleada alemã esperada.',val:false,odds:{h:10.0,e:5.50,a:1.30}},
+  {id:'E6',g:'E',rd:3,home:'Curaçao',away:'Costa do Marfim',date:'2026-06-25',brt:'17:00',est:'Lincoln Financial Field',city:'Philadelphia',sim:'0-2',analise:'Costa do Marfim vs Curaçao com Costa do Marfim precisando vencer para garantir ou melhorar a classificação. Curaçao não tem como competir neste nível.',val:false,odds:{h:9.00,e:5.00,a:1.35}},
+  {id:'F1',g:'F',rd:1,home:'Holanda',away:'Japão',date:'2026-06-14',brt:'17:00',est:'AT&T Stadium',city:'Dallas',sim:'1-1',analise:'Holanda vs Japão — não é jogo simples. Japão eliminou Alemanha e Espanha em 2022 e tem uma das melhores organizações defensivas do mundo. Fecha o bloco, compacto, disciplinado. Holanda tem qualidade ofensiva mas vai encontrar dificuldade para criar. Mercado vai inflar a Holanda. Japão não perde por mais de 1 gol.',val:true,odds:{h:1.60,e:3.80,a:5.50}},
+  {id:'F2',g:'F',rd:1,home:'Suécia',away:'Tunísia',date:'2026-06-14',brt:'23:00',est:'Estadio BBVA',city:'Monterrey',sim:'2-0',analise:'Suécia vs Tunísia. Isak é o atacante mais perigoso da Suécia — presença física e técnica acima do padrão africano. Tunísia vai tentar fechar mas não tem como segurar. Suécia controla.',val:false,odds:{h:1.60,e:3.80,a:5.50}},
+  {id:'F3',g:'F',rd:2,home:'Tunísia',away:'Japão',date:'2026-06-20',brt:'01:00',est:'Estadio BBVA',city:'Monterrey',sim:'0-2',analise:'Tunísia vs Japão com Japão favorito. Japão já com pontos na conta vai fazer gestão mas não vai abrir espaços. Tunísia precisando de resultado vai jogar mais aberto — Japão vai explorar os espaços no contragolpe.',val:false,odds:{h:5.50,e:4.00,a:1.50}},
+  {id:'F4',g:'F',rd:2,home:'Holanda',away:'Suécia',date:'2026-06-20',brt:'14:00',est:'NRG Stadium',city:'Houston',sim:'3-1',analise:'Holanda vs Suécia — Holanda favorita clara. Van Dijk na defesa, Gakpo e Depay no ataque. Suécia vai brigar mas é inferiormente à Holanda em qualidade de elenco.',val:false,odds:{h:1.55,e:3.80,a:5.20}},
+  {id:'F5',g:'F',rd:3,home:'Japão',away:'Suécia',date:'2026-06-25',brt:'20:00',est:'AT&T Stadium',city:'Dallas',sim:'2-0',analise:'Japão vs Suécia com ambos disputando a 2ª vaga ou melhor 3º. Japão em melhor momento no torneio vai confirmar a classificação.',val:false,odds:{h:1.50,e:4.00,a:6.50}},
+  {id:'F6',g:'F',rd:3,home:'Tunísia',away:'Holanda',date:'2026-06-25',brt:'20:00',est:'Arrowhead Stadium',city:'Kansas City',sim:'0-3',analise:'Tunísia vs Holanda com Tunísia eliminada. Holanda vai rotacionar mas ainda tem qualidade suficiente para vencer com folga.',val:false,odds:{h:8.00,e:4.50,a:1.30}},
+  {id:'G1',g:'G',rd:1,home:'Bélgica',away:'Egito',date:'2026-06-15',brt:'16:00',est:'Lumen Field',city:'Seattle',sim:'1-1',analise:'Bélgica vs Egito — confronto muito difícil de antecipar. Salah num dia bom é imparável mesmo para a Bélgica de De Bruyne. Bélgica é tecnicamente superior no coletivo mas Egito tem o melhor jogador individual do grupo. Mercado vai subestimar o Egito. Empate é cenário realista.',val:true,odds:{h:1.80,e:3.30,a:4.20}},
+  {id:'G2',g:'G',rd:1,home:'Irã',away:'Nova Zelândia',date:'2026-06-15',brt:'22:00',est:'SoFi Stadium',city:'Los Angeles',sim:'2-0',analise:'Irã vs Nova Zelândia. Irã é fisicamente forte, bem organizado defensivamente e com qualidade ofensiva subestimada pelo mercado. Nova Zelândia é o time mais fraco do grupo. Irã controla sem dificuldade.',val:false,odds:{h:1.70,e:3.50,a:4.80}},
+  {id:'G3',g:'G',rd:2,home:'Bélgica',away:'Irã',date:'2026-06-21',brt:'16:00',est:'SoFi Stadium',city:'Los Angeles',sim:'2-0',analise:'Bélgica vs Irã. Irã vai fechar o bloco e tentar conter a Bélgica com disciplina tática. Bélgica tem mais qualidade para criar jogadas mas Irã é difícil de superar. Bélgica vence por pouca margem.',val:false,odds:{h:1.45,e:4.20,a:7.50}},
+  {id:'G4',g:'G',rd:2,home:'Nova Zelândia',away:'Egito',date:'2026-06-21',brt:'22:00',est:'BC Place',city:'Vancouver',sim:'1-2',analise:'Nova Zelândia vs Egito com Salah ainda vivo na competição. Egito motivado e Nova Zelândia sem recursos para segurar o atacante do Liverpool. Salah decide.',val:false,odds:{h:4.20,e:3.30,a:1.80}},
+  {id:'G5',g:'G',rd:3,home:'Egito',away:'Irã',date:'2026-06-27',brt:'00:00',est:'Lumen Field',city:'Seattle',sim:'1-0',analise:'Egito vs Irã — jogo decisivo pelo 2º lugar. Salah decide se estiver em condições. Irã vai pressionar mas Egito tem mais qualidade individual.',val:false,odds:{h:2.00,e:3.20,a:3.60}},
+  {id:'G6',g:'G',rd:3,home:'Nova Zelândia',away:'Bélgica',date:'2026-06-27',brt:'00:00',est:'BC Place',city:'Vancouver',sim:'1-3',analise:'Bélgica vs Nova Zelândia. Bélgica sela a liderança. Nova Zelândia já eliminada.',val:false,odds:{h:8.00,e:4.50,a:1.30}},
+  {id:'H1',g:'H',rd:1,home:'Espanha',away:'Cabo Verde',date:'2026-06-15',brt:'13:00',est:'Mercedes-Benz Stadium',city:'Atlanta',sim:'3-0',analise:'Espanha vs Cabo Verde — abismo técnico. Yamal, Pedri, Nico Williams contra estreantes do Atlântico. Espanha vai dominar a posse e construir placar amplo desde cedo.',val:true,odds:{h:1.18,e:6.50,a:14.0}},
+  {id:'H2',g:'H',rd:1,home:'Arábia Saudita',away:'Uruguai',date:'2026-06-15',brt:'19:00',est:'Hard Rock Stadium',city:'Miami',sim:'0-2',analise:'Arábia Saudita vs Uruguai. Valverde e Núñez formam dupla perigosa. Arábia Saudita vai tentar o mesmo que fez contra a Argentina em 2022 — fechar o bloco alto. Uruguai tem mais experiência e qualidade para superar a armadilha.',val:false,odds:{h:4.80,e:3.50,a:1.70}},
+  {id:'H3',g:'H',rd:2,home:'Espanha',away:'Arábia Saudita',date:'2026-06-21',brt:'13:00',est:'Mercedes-Benz Stadium',city:'Atlanta',sim:'1-1',analise:'Espanha vs Arábia Saudita. Espanha pode tentar poupar jogadores. Arábia Saudita com o fator surpresa — já derrubou Argentina. Mercado vai colocar Espanha como favorita pesada mas jogo pode ser mais complicado do que parece.',val:false,odds:{h:1.45,e:4.20,a:7.50}},
+  {id:'H4',g:'H',rd:2,home:'Uruguai',away:'Cabo Verde',date:'2026-06-21',brt:'19:00',est:'Hard Rock Stadium',city:'Miami',sim:'3-0',analise:'Uruguai vs Cabo Verde. Núñez em zona de gol, Valverde controlando o meio. Cabo Verde não tem como conter o ataque uruguaio. Goleada que sela a vaga do Uruguai.',val:false,odds:{h:1.40,e:4.50,a:8.50}},
+  {id:'H5',g:'H',rd:3,home:'Cabo Verde',away:'Arábia Saudita',date:'2026-06-26',brt:'21:00',est:'NRG Stadium',city:'Houston',sim:'1-2',analise:'Cabo Verde vs Arábia Saudita — jogo entre dois já eliminados ou sem chances de avanço. Arábia Saudita vai tentar o resultado para salvar o torneio.',val:false,odds:{h:4.00,e:3.40,a:1.90}},
+  {id:'H6',g:'H',rd:3,home:'Uruguai',away:'Espanha',date:'2026-06-26',brt:'21:00',est:'Estadio Akron',city:'Guadalajara',sim:'1-2',analise:'Uruguai vs Espanha — o maior jogo do grupo H. Espanha com mais qualidade técnica mas Uruguai é raça pura e Valverde é um dos melhores do mundo na posição. Espanha favorita mas Uruguai não vai facilitar.',val:false,odds:{h:4.50,e:3.50,a:1.75}},
+  {id:'I1',g:'I',rd:1,home:'França',away:'Senegal',date:'2026-06-16',brt:'16:00',est:'MetLife Stadium',city:'Nova York/NJ',sim:'2-0',analise:'França vs Senegal. Senegal tem Sarr, Diatta, qualidade real. Mas França tem o melhor ataque individual do torneio — Mbappé capitão no Real Madrid. Senegal vai tentar fechar e explorar o contragolpe. França resolve mas pode levar susto no 1T.',val:false,odds:{h:1.55,e:3.80,a:5.50}},
+  {id:'I2',g:'I',rd:1,home:'Iraque',away:'Noruega',date:'2026-06-16',brt:'19:00',est:'Gillette Stadium',city:'Boston',sim:'0-2',analise:'Iraque vs Noruega. Haaland é o maior perigo individual desta Copa. Iraque é o mais fraco do grupo I. Noruega vai dominar nos duelos físicos e Haaland vai aparecer.',val:false,odds:{h:12.0,e:6.00,a:1.25}},
+  {id:'I3',g:'I',rd:2,home:'França',away:'Iraque',date:'2026-06-22',brt:'18:00',est:'Lincoln Financial Field',city:'Philadelphia',sim:'3-1',analise:'França vs Iraque. França com plantel muito superior em todos os setores. Resultado amplo esperado. Iraque pode marcar em jogada isolada de bola parada.',val:false,odds:{h:1.25,e:6.00,a:12.0}},
+  {id:'I4',g:'I',rd:2,home:'Noruega',away:'Senegal',date:'2026-06-22',brt:'21:00',est:'MetLife Stadium',city:'Nova York/NJ',sim:'2-0',analise:'Noruega vs Senegal. Haaland é o x da questão — centroavante número 1 do mundo atual. Senegal tem qualidade mas é inferior individualmente. Noruega favorita, mercado subestima a força física e a qualidade de Haaland.',val:true,odds:{h:1.85,e:3.40,a:4.20}},
+  {id:'I5',g:'I',rd:3,home:'Noruega',away:'França',date:'2026-06-26',brt:'16:00',est:'Gillette Stadium',city:'Boston',sim:'1-2',analise:'Noruega vs França — o jogo mais difícil do grupo I. Haaland contra a defesa francesa. França vai ser favorita pesada mas Noruega tem o melhor centroavante do torneio. Mercado vai inflar a França. Noruega cobre o handicap.',val:true,odds:{h:5.20,e:3.80,a:1.60}},
+  {id:'I6',g:'I',rd:3,home:'Senegal',away:'Iraque',date:'2026-06-26',brt:'16:00',est:'BMO Field',city:'Toronto',sim:'2-0',analise:'Senegal vs Iraque com Iraque já eliminado. Senegal com raça e qualidade técnica. Resultado esperado.',val:false,odds:{h:1.60,e:3.80,a:5.50}},
+  {id:'J1',g:'J',rd:1,home:'Áustria',away:'Jordânia',date:'2026-06-16',brt:'01:00',est:"Levi's Stadium",city:'San Francisco',sim:'1-0',analise:'Áustria vs Jordânia. Áustria surpreendeu nas eliminatórias europeias — time organizado, Sabitzer como motor no meio. Jordânia é estreante na Copa, qualidade limitada. Áustria vence por margem mínima.',val:false,odds:{h:2.00,e:3.20,a:3.80}},
+  {id:'J2',g:'J',rd:1,home:'Argentina',away:'Argélia',date:'2026-06-16',brt:'22:00',est:'Arrowhead Stadium',city:'Kansas City',sim:'1-0',analise:'Argentina vs Argélia. Argentina com Messi, Lautaro e Julián Álvarez — ataque de primeira prateleira. Argélia tem qualidade mas é inferior individualmente. Mercado vai inflar a Argentina pelo fator Messi — odd pode estar subestimada para a Argélia no 1T.',val:false,odds:{h:1.45,e:4.20,a:7.50}},
+  {id:'J3',g:'J',rd:2,home:'Jordânia',away:'Argélia',date:'2026-06-22',brt:'00:00',est:"Levi's Stadium",city:'San Francisco',sim:'0-2',analise:'Jordânia vs Argélia. Argélia com mais qualidade. Jordânia já eliminada ou sem chances. Argélia resolve.',val:false,odds:{h:5.00,e:3.50,a:1.70}},
+  {id:'J4',g:'J',rd:2,home:'Argentina',away:'Áustria',date:'2026-06-22',brt:'14:00',est:'AT&T Stadium',city:'Dallas',sim:'0-0',analise:'Argentina vs Áustria com ambos já classificados. Messi e companhia vão preservar para o mata-mata. Áustria idem. Empate é o cenário mais lógico — ambos têm incentivo para gerir.',val:true,odds:{h:2.20,e:2.90,a:3.20}},
+  {id:'J5',g:'J',rd:3,home:'Argélia',away:'Áustria',date:'2026-06-27',brt:'23:00',est:'Arrowhead Stadium',city:'Kansas City',sim:'0-1',analise:'Argélia vs Áustria decidindo o 2º lugar. Áustria mais organizada taticamente e com melhor nível de liga. Argélia vai brigar mas Áustria leva.',val:false,odds:{h:3.00,e:3.20,a:2.30}},
+  {id:'J6',g:'J',rd:3,home:'Jordânia',away:'Argentina',date:'2026-06-27',brt:'23:00',est:'AT&T Stadium',city:'Dallas',sim:'0-2',analise:'Jordânia vs Argentina com Argentina controlando o resultado que interessa. Messi pode fazer aparição rápida. Argentina vence administrando.',val:false,odds:{h:10.0,e:5.50,a:1.30}},
+  {id:'K1',g:'K',rd:1,home:'Portugal',away:'RD Congo',date:'2026-06-17',brt:'14:00',est:'NRG Stadium',city:'Houston',sim:'3-0',analise:'Portugal vs RD Congo. Bruno Fernandes, Vitinha, Leão, Ronaldo — elenco muito superior. RD Congo estreante na Copa. Portugal vai dominar e construir saldo de gols.',val:true,odds:{h:1.20,e:6.50,a:14.0}},
+  {id:'K2',g:'K',rd:1,home:'Uzbequistão',away:'Colômbia',date:'2026-06-17',brt:'23:00',est:'Estadio Azteca',city:'Cidade do México',sim:'1-2',analise:'Uzbequistão vs Colômbia. James Rodríguez como criador de jogo para a Colômbia. Uzbequistão é estreante mas mais organizado do que o mercado imagina. Colômbia favorita — James decide no 2T quando o jogo abre.',val:false,odds:{h:5.00,e:3.50,a:1.70}},
+  {id:'K3',g:'K',rd:2,home:'Portugal',away:'Uzbequistão',date:'2026-06-23',brt:'14:00',est:'NRG Stadium',city:'Houston',sim:'2-0',analise:'Portugal vs Uzbequistão. Portugal vai confirmar a liderança. Uzbequistão vai fechar o bloco mas não tem qualidade para segurar por 90 minutos.',val:false,odds:{h:1.30,e:5.50,a:10.0}},
+  {id:'K4',g:'K',rd:2,home:'Colômbia',away:'RD Congo',date:'2026-06-23',brt:'23:00',est:'Estadio Akron',city:'Guadalajara',sim:'3-0',analise:'Colômbia vs RD Congo. Colômbia construindo saldo de gols. RD Congo sem recursos para competir neste nível.',val:false,odds:{h:1.35,e:5.00,a:9.00}},
+  {id:'K5',g:'K',rd:3,home:'Colômbia',away:'Portugal',date:'2026-06-27',brt:'20:30',est:'Hard Rock Stadium',city:'Miami',sim:'1-2',analise:'Colômbia vs Portugal — o jogo mais difícil de Portugal no grupo. James vs Bruno Fernandes. Colômbia tem qualidade para criar problema. Portugal favorito mas Colômbia não é zebra.',val:false,odds:{h:4.50,e:3.50,a:1.75}},
+  {id:'K6',g:'K',rd:3,home:'RD Congo',away:'Uzbequistão',date:'2026-06-27',brt:'20:30',est:'Mercedes-Benz Stadium',city:'Atlanta',sim:'0-2',analise:'RD Congo vs Uzbequistão. Uzbequistão estreante mas mais organizado. Resultado para os uzbeques.',val:false,odds:{h:4.00,e:3.40,a:1.90}},
+  {id:'L1',g:'L',rd:1,home:'Inglaterra',away:'Croácia',date:'2026-06-17',brt:'17:00',est:'AT&T Stadium',city:'Dallas',sim:'2-1',analise:'Inglaterra vs Croácia — revanche do Euro. Bellingham, Saka, Foden contra Modrić e companhia. Croácia vai tentar fechar o bloco no 1T e usar Modrić para controlar o ritmo. Inglaterra tem mais qualidade individual e vai pressionar. Drama no 2T — Inglaterra vira.',val:false,odds:{h:1.70,e:3.50,a:4.80}},
+  {id:'L2',g:'L',rd:1,home:'Gana',away:'Panamá',date:'2026-06-17',brt:'20:00',est:'BMO Field',city:'Toronto',sim:'2-1',analise:'Gana vs Panamá. Kudus é o principal talento individual do grupo L. Gana tem mais recursos técnicos e físicos que o Panamá.',val:false,odds:{h:1.90,e:3.30,a:4.00}},
+  {id:'L3',g:'L',rd:2,home:'Inglaterra',away:'Gana',date:'2026-06-23',brt:'17:00',est:'Gillette Stadium',city:'Boston',sim:'1-1',analise:'Inglaterra vs Gana. Inglaterra pode poupar titulares com a vaga assegurada. Gana vai aproveitar qualquer vacilo. Mercado vai colocar Inglaterra como favorita pesada — jogo pode ser mais equilibrado do que parece.',val:true,odds:{h:1.50,e:4.00,a:7.00}},
+  {id:'L4',g:'L',rd:2,home:'Panamá',away:'Croácia',date:'2026-06-23',brt:'20:00',est:'BMO Field',city:'Toronto',sim:'0-2',analise:'Panamá vs Croácia. Modrić e companhia são superiores em todos os setores. Panamá vai fechar o bloco mas a qualidade croata supera.',val:false,odds:{h:8.50,e:4.50,a:1.40}},
+  {id:'L5',g:'L',rd:3,home:'Panamá',away:'Inglaterra',date:'2026-06-27',brt:'18:00',est:'MetLife Stadium',city:'Nova York/NJ',sim:'0-3',analise:'Panamá vs Inglaterra. Panamá eliminado. Inglaterra já classificada vai gerir mas tem qualidade para vencer com margem.',val:false,odds:{h:12.0,e:6.00,a:1.25}},
+  {id:'L6',g:'L',rd:3,home:'Croácia',away:'Gana',date:'2026-06-27',brt:'18:00',est:'Lincoln Financial Field',city:'Philadelphia',sim:'2-0',analise:'Croácia vs Gana decidindo o 2º lugar. Croácia com experiência de Copa do Mundo (final em 2018, 3º em 2022). Gana tem talento mas Croácia é mais consistente.',val:false,odds:{h:1.65,e:3.60,a:5.50}},
+];
+
+// ----------------------------------------
+// STATE
+// ----------------------------------------
+let S={results:{},scorers:{}};
+function load(){const s=localStorage.getItem('copa26l10');if(s)S=JSON.parse(s);}
+function save(){localStorage.setItem('copa26l10',JSON.stringify(S));}
+
+// ----------------------------------------
+// HELPERS
+// ----------------------------------------
+function today(){return new Date().toISOString().slice(0,10);}
+const WKDAYS=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+const MONTHS=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+function fmtDay(d){
+  const dt=new Date(d+'T12:00:00');
+  return `${dt.getDate()} de ${MONTHS[dt.getMonth()]} — ${WKDAYS[dt.getDay()]}`;
+}
+function pct(odd){return Math.round(100/odd);}
+function devCls(d){return d==='confirmou'?'c':d==='zebra'?'z':'p';}
+
+// ----------------------------------------
+// NAV
+// ----------------------------------------
+function nav(id){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('on');});
+  render(id);
+}
+function render(id){
+  if(id==='dash')renderDash();
+  if(id==='grupos')renderGrupos();
+  if(id==='jogos')renderJogos();
+  if(id==='art')renderArt();
+  if(id==='ia')renderIA();
+}
+
+// ----------------------------------------
+// MATCH CARD — único componente central
+// ----------------------------------------
+function matchCard(j,anaOpen,showPts=false){
+  const r=S.results[j.id];
+  const m=MERC[j.id]||{m:[]};
+  // Pontuação atual dos times
+  const _st=calcSt(j.g);
+  const _home=_st.find(x=>x.name===j.home)||{pts:0,j:0};
+  const _away=_st.find(x=>x.name===j.away)||{pts:0,j:0};
+  const ptsBadge=(pts,jg)=>`<span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--acc);background:var(--acc-dim);border:1px solid var(--acc-glow);border-radius:4px;padding:2px 9px;flex-shrink:0;white-space:nowrap">${pts}pts</span>`;
+  const oh=j.odds.h,oe=j.odds.e,oa=j.odds.a;
+  const ph=pct(oh),pe=pct(oe),pa=pct(oa);
+  const cls=(r?'done':'')+(j.val&&!r?' val':'');
+  const devHtml=r&&r.dev?`<span class="dtag ${devCls(r.dev)}">${r.dev}</span>`:'';
+  const valHtml=j.val&&!r?`<span class="vtag">Valor</span>`:'';
+  const mercVisiveis=m.m.slice(0,3);
+  const maisQt=m.m.length-3;
+  const mercsHtml=mercVisiveis.map(x=>`<span class="merc-pill ${x.c}"><span class="merc-pill-dot"></span>${x.t}</span>`).join('');
+  const golsHtml=r&&r.goals&&r.goals.filter(g=>g.p).length
+    ?r.goals.filter(g=>g.p).map(g=>`<span style="font-size:10px;color:${g.team==='home'?'var(--grn)':'var(--blu)'};font-family:'Barlow Condensed',sans-serif;font-weight:700">${g.min?g.min+"' ":""}${g.p}</span>`).join('<span style="color:var(--tx4);margin:0 3px">·</span>')
+    :'';
+
+  return `<div class="mc ${cls}" id="mc-${j.id}">
+  <div style="display:flex;align-items:stretch;min-height:72px">
+
+    <!-- COL 1: grupo + data + botão (130px) -->
+    <div style="width:130px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:8px 12px;border-right:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:var(--acc);text-transform:uppercase;letter-spacing:.05em">Grupo ${j.g}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--tx2);background:var(--s3);border:1px solid var(--bd2);border-radius:3px;padding:1px 5px">R${j.rd}</span>
+      </div>
+      <div style="font-size:10px;color:var(--tx3);line-height:1.3">${fmtDay(j.date)}</div>
+      <div style="display:flex;gap:3px;margin-top:2px;flex-wrap:wrap">
+        ${r
+          ?`<button class="btn btn-done btn-sm" onclick="openM('${j.id}')">editar</button>`
+          :`<button class="btn btn-reg btn-sm" onclick="openM('${j.id}')">registrar</button>`
+        }
+      </div>
+      ${devHtml||valHtml?`<div style="display:flex;gap:3px;margin-top:2px;flex-wrap:wrap">${devHtml}${valHtml}</div>`:''}
+    </div>
+
+    <!-- COL 2: time home (flex 1) -->
+    <div style="flex:1;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 14px;min-width:0">
+      ${fi(j.home,40,30)}
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;letter-spacing:.01em;text-transform:uppercase;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${j.home}</span>
+      ${showPts?ptsBadge(_home.pts,_home.j):''}
+    </div>
+
+    <!-- COL 3: placar + cidade (120px) -->
+    <div style="width:120px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px;gap:3px">
+      ${r
+        ?`<div style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;color:var(--grn);line-height:1">${r.sh} – ${r.sa}</div>`
+        :`<div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:#c89040;line-height:1">${j.brt}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8a9abf;line-height:1;margin-top:2px">prev ${j.sim.replace('-','–')}</div>`
+      }
+      <div style="font-size:9px;color:var(--tx3);text-align:center;line-height:1.3;margin-top:2px;max-width:90px">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;color:var(--tx2)">${j.city}</span>
+      </div>
+    </div>
+
+    <!-- COL 4: time away (flex 1) -->
+    <div style="flex:1;display:flex;align-items:center;justify-content:flex-start;gap:8px;padding:0 14px;min-width:0">
+      ${showPts?ptsBadge(_away.pts,_away.j):''}
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;letter-spacing:.01em;text-transform:uppercase;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${j.away}</span>
+      ${fi(j.away,40,30)}
+    </div>
+
+    <!-- COL 5: odds + mercados + análise (480px) -->
+    <div style="width:480px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:8px 14px;border-left:1px solid var(--bd)">
+
+      <!-- Odds com barras -->
+      <div style="display:flex;gap:0;align-items:stretch;background:var(--s3);border-radius:5px;overflow:hidden">
+        ${[{l:'Casa',v:oh,p:ph,c:'var(--grn)'},{l:'Emp',v:oe,p:pe,c:'var(--amb)'},{l:'Fora',v:oa,p:pa,c:'var(--red)'}].map((o,i)=>`
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:6px 6px;${i<2?'border-right:1px solid var(--bd);':''}">
+            <span style="font-size:10px;color:var(--tx2);font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.03em">${o.l} <span style="color:${o.c}">${o.p}%</span></span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:${o.c};line-height:1.2;margin-top:2px">${o.v}</span>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Mercados -->
+      <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">
+        ${mercsHtml}
+        ${maisQt>0?`<span style="font-size:9px;color:var(--tx3);font-family:'Barlow Condensed',sans-serif;font-weight:700">+${maisQt}</span>`:''}
+      </div>
+
+      <!-- Análise curta -->
+      <div style="font-size:12px;color:var(--tx2);line-height:1.6">${j.analise}</div>
+
+      <!-- Gols -->
+      ${golsHtml?`<div style="display:flex;flex-wrap:wrap;gap:3px">${golsHtml}</div>`:''}
+
+    </div>
+
+  </div>
+</div>`;
+}
+function toggleAna(id){}
+
+// ----------------------------------------
+// DASHBOARD
+// ----------------------------------------
+function renderDash(){
+  const now=new Date();
+  const tod=today();
+  document.getElementById('top-date').textContent=now.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+  const played=Object.keys(S.results).length;
+  document.getElementById('top-badge').textContent=`${played}/72 jogos`;
+  // Calcular taxa ANTES de usar
+  const gols=Object.values(S.results).reduce((a,r)=>a+(+r.sh||0)+(+r.sa||0),0);
+  const conf=Object.values(S.results).filter(r=>r.dev==='confirmou').length;
+  const zeb=Object.values(S.results).filter(r=>r.dev==='zebra').length;
+  const parc=Object.values(S.results).filter(r=>r.dev==='parcial').length;
+  const tot=conf+zeb+parc;
+  const taxa=tot?Math.round(((conf+parc*.5)/tot)*100):null;
+  // Atualizar subtítulo
+  const subEl=document.getElementById('dash-sub');
+  if(subEl) subEl.textContent=played>0?`${played} resultado${played>1?'s':''} registrado${played>1?'s':''}${taxa!==null?' · '+taxa+'% acerto':''}`:''
+
+  // (variáveis já calculadas acima)
+  const calRate=document.getElementById('dash-cal-rate');if(calRate)calRate.textContent=taxa!==null?taxa+'% acerto':'';
+  const _dm=document.getElementById('dash-met');if(_dm)_dm.innerHTML=`
+    <div class="mcard"><div class="mc-l">Jogos</div><div class="met-v c-acc">${played}/72</div></div>
+    <div class="mcard"><div class="mc-l">Gols</div><div class="met-v c-acc">${gols}</div></div>
+    <div class="mcard"><div class="mc-l">Confirmadas</div><div class="met-v c-grn">${conf}</div></div>
+    <div class="mcard"><div class="mc-l">Parciais</div><div class="met-v c-amb">${parc}</div></div>
+    <div class="mcard"><div class="mc-l">Zebras</div><div class="met-v c-red">${zeb}</div></div>
+  `;
+
+  // agrupar por dia para a listagem
+  const todayGames=JOGOS.filter(j=>j.date===tod);
+  const todSec=document.getElementById('dash-today-sec');
+  const nxtSec=document.getElementById('dash-next-sec');
+
+  if(todayGames.length){
+    todayGames.sort((a,b)=>a.brt.localeCompare(b.brt));todSec.innerHTML=`<div class="day-div"><span class="day-label">Jogos de hoje — ${fmtDay(tod)}</span><span class="day-line"></span><span class="day-count">${todayGames.length} jogos</span></div>`+todayGames.map(j=>matchCard(j,false)).join('');
+  } else {
+    todSec.innerHTML='';
+  }
+
+  // próximos: pegar os próximos 8 não registrados, agrupar por dia
+  const pend=JOGOS.filter(j=>!S.results[j.id]&&j.date>=tod).sort((a,b)=>a.date.localeCompare(b.date)||a.brt.localeCompare(b.brt));
+  if(!pend.length){nxtSec.innerHTML='<p style="color:var(--tx3);font-size:13px;padding:16px 0">Todos os jogos foram registrados.</p>';return;}
+  const byDay={};
+  pend.forEach(j=>{(byDay[j.date]=byDay[j.date]||[]).push(j);});
+  nxtSec.innerHTML=Object.keys(byDay).sort().map(date=>{const games=byDay[date];return `<div class="day-div"><span class="day-label">${fmtDay(date)}</span><span class="day-line"></span><span class="day-count">${games.length} jogos</span></div>`+games.sort((a,b)=>a.brt.localeCompare(b.brt)).map(j=>matchCard(j,false,false)).join('');}).join('');
+}
+
+// ----------------------------------------
+// GRUPOS
+// ----------------------------------------
+let gTab='A';
+function renderGrupos(){
+  document.getElementById('gtabs').innerHTML=Object.keys(GR).map(g=>
+    `<button class="tab ${g===gTab?'on':''}" onclick="gTab='${g}';renderGrupos()">${g}</button>`
+  ).join('');
+  const st=calcSt(gTab);
+  const jogosG=JOGOS.filter(j=>j.g===gTab);
+  const byDay={};
+  jogosG.forEach(j=>{(byDay[j.date]=byDay[j.date]||[]).push(j);});
+
+  // Análise do grupo
+  const totalJogos=jogosG.length;
+  const jogadosG=jogosG.filter(j=>S.results[j.id]).length;
+  const restantes=jogosG.filter(j=>!S.results[j.id]);
+  const proxJogo=restantes.sort((a,b)=>a.date.localeCompare(b.date)||a.brt.localeCompare(b.brt))[0];
+
+  // Calcular % de chance de classificação (simples: baseado em pts e rodadas restantes)
+  const maxPts=9;
+  const chanceCls=st.map((t,i)=>{
+    if(t.j===0) return {name:t.name,pct:i<2?75:25};
+    const ptsPossiveis=t.pts+((3-t.j)*3);
+    const score=Math.min(99,Math.max(1,Math.round((t.pts/Math.max(1,t.j*3))*100)));
+    return {name:t.name,pct:score,pts:t.pts,j:t.j};
+  });
+
+  // Próximos jogos do grupo (não registrados)
+  const prxJogosHtml=restantes.slice(0,3).map(j=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)">
+      <span style="font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace;min-width:36px">${j.brt}</span>
+      <span style="font-size:10px;color:var(--acc3);font-family:'JetBrains Mono',monospace;min-width:60px">${fmtDay(j.date).split(' —')[0]}</span>
+      <div style="flex:1;display:flex;align-items:center;gap:6px;min-width:0">
+        ${fi(j.home,20,15)}
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;color:var(--tx);text-transform:uppercase">${j.home}</span>
+        <span style="color:var(--tx4);font-size:10px">vs</span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;color:var(--tx);text-transform:uppercase">${j.away}</span>
+        ${fi(j.away,20,15)}
+      </div>
+      ${j.val?'<span class="vtag">Valor</span>':''}
+    </div>
+  `).join('');
+
+  // Análise textual do grupo
+  const analisesGrupo=jogosG.filter(j=>S.results[j.id]).map(j=>{
+    const r=S.results[j.id];
+    return `<div style="padding:5px 0;border-bottom:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+        ${fi(j.home,20,15)}
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;color:var(--tx);text-transform:uppercase">${j.home}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:${r.sh>r.sa?'var(--grn)':r.sh<r.sa?'var(--red)':'var(--amb)'}">${r.sh}–${r.sa}</span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;color:var(--tx);text-transform:uppercase">${j.away}</span>
+        ${fi(j.away,20,15)}
+        ${r.dev?`<span class="dtag ${devCls(r.dev)}" style="margin-left:4px">${r.dev}</span>`:''}
+      </div>
+      ${r.obs?`<div style="font-size:10px;color:var(--tx3);font-style:italic">"${r.obs}"</div>`:''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('gcontent').innerHTML=`
+    <div style="display:grid;grid-template-columns:480px 1fr;gap:16px;align-items:start">
+
+      <!-- COLUNA ESQUERDA: tabela compacta -->
+      <div style="width:100%">
+        <div class="gtab-wrap">
+          <table class="tbl"><thead><tr>
+            <th>#</th><th>Seleção</th><th class="c">Pts</th><th class="c">J</th><th class="c">V</th><th class="c">E</th><th class="c">D</th><th class="c">SG</th><th class="c">GP</th><th class="c">GC</th>
+          </tr></thead><tbody>
+          ${st.map((t,i)=>{
+            const pc=['pos-1','pos-2','pos-3','pos-4'][i];
+            const pl=[{t:'1º',c:'pb1'},{t:'2º',c:'pb2'},{t:'3º',c:'pb3'},{t:'fora',c:'pb4'}][i];
+            const sg=t.sg>=0?'+'+t.sg:t.sg;
+            return `<tr>
+              <td class="${pc}" style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600">${i+1}</td>
+              <td><div class="tc">${fi(t.name,20,15)}<span>${t.name}</span><span class="pbadge ${pl.c}">${pl.t}</span></div></td>
+              <td class="mo" style="color:var(--acc);font-weight:700;font-size:14px">${t.pts}</td>
+              <td class="mo">${t.j}</td><td class="mo">${t.v}</td><td class="mo">${t.e}</td><td class="mo">${t.d}</td>
+              <td class="mo" style="color:${t.sg>=0?'var(--grn)':'var(--red)'}">${sg}</td>
+              <td class="mo">${t.gp}</td><td class="mo">${t.gc}</td>
+            </tr>`;
+          }).join('')}
+          </tbody></table>
+        </div>
+
+        <!-- Barras de chance de classificação -->
+        <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:12px 14px;margin-top:8px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:var(--acc);letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px">Chance de classificação</div>
+          ${st.map((t,i)=>{
+            const base=[82,65,30,8];
+            const jogados=t.j;
+            let pct=base[i];
+            if(jogados>0){
+              if(i===0) pct=Math.min(98,Math.round(50+(t.pts/9)*48));
+              else if(i===1) pct=Math.min(90,Math.round(30+(t.pts/9)*50));
+              else if(i===2) pct=Math.max(2,Math.round(15+(t.pts/9)*30));
+              else pct=Math.max(1,Math.round(5+(t.pts/9)*15));
+            }
+            const cor=i<2?'var(--grn)':i===2?'var(--amb)':'var(--red)';
+            return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+              <div style="display:flex;align-items:center;gap:5px;width:130px">${fi(t.name,20,15)}<span style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--tx);text-transform:uppercase">${t.name}</span></div>
+              <div style="flex:1;height:4px;background:var(--s3);border-radius:2px"><div style="width:${pct}%;height:100%;background:${cor};border-radius:2px;transition:width .4s"></div></div>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${cor};min-width:30px;text-align:right">${pct}%</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- COLUNA DIREITA: análise do grupo -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+
+        <!-- Progresso -->
+        <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:12px 14px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:var(--acc);letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px">Grupo ${gTab} — ${jogadosG}/${totalJogos} jogos</div>
+          <div style="height:4px;background:var(--s3);border-radius:2px;margin-bottom:10px"><div style="width:${Math.round(jogadosG/totalJogos*100)}%;height:100%;background:var(--acc);border-radius:2px"></div></div>
+          ${jogadosG>0&&analisesGrupo?`<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Resultados registrados</div>${analisesGrupo}`:'<div style="font-size:12px;color:var(--tx3)">Nenhum resultado registrado ainda</div>'}
+        </div>
+
+        <!-- Próximos jogos do grupo -->
+        ${prxJogosHtml?`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:12px 14px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:var(--acc);letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px">Próximos jogos</div>
+          ${prxJogosHtml}
+        </div>`:''}
+
+        <!-- Análise trader dos próximos jogos -->
+        ${restantes.slice(0,2).map(j=>`
+          <div style="background:var(--s2);border:1px solid var(--bd);border-left:2px solid ${j.val?'var(--acc)':'var(--bd2)'};border-radius:var(--r8);padding:12px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+              ${fi(j.home,20,15)}
+              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:var(--tx);text-transform:uppercase">${j.home}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--tx3)">vs</span>
+              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:var(--tx);text-transform:uppercase">${j.away}</span>
+              ${fi(j.away,20,15)}
+              ${j.val?'<span class="vtag" style="margin-left:4px">Valor</span>':''}
+              <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--acc3)">${j.brt} · ${fmtDay(j.date).split(' —')[0]}</span>
+            </div>
+            <div style="font-size:12px;color:var(--tx2);line-height:1.65;margin-bottom:8px">${j.analise}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${(MERC[j.id]||{m:[]}).m.map(x=>`<span class="merc-pill ${x.c}"><span class="merc-pill-dot"></span>${x.t}</span>`).join('')}
+            </div>
+          </div>
+        `).join('')}
+
+      </div>
+    </div>
+
+    <!-- Jogos por data abaixo -->
+    <div style="margin-top:16px">
+      ${Object.keys(byDay).sort().map(date=>{const games=byDay[date];return `<div class="day-div"><span class="day-label">${fmtDay(date)}</span><span class="day-line"></span><span class="day-count">${games.length} jogos</span></div>`+games.sort((a,b)=>a.brt.localeCompare(b.brt)).map(j=>matchCard(j,false,false)).join('');}).join('')}
+    </div>
+  `;
+}
+function calcSt(g){
+  const teams=GR[g].t.map(n=>({name:n,j:0,v:0,e:0,d:0,gp:0,gc:0,sg:0,pts:0}));
+  JOGOS.filter(j=>j.g===g).forEach(jogo=>{
+    const r=S.results[jogo.id];if(!r)return;
+    const h=teams.find(t=>t.name===jogo.home),a=teams.find(t=>t.name===jogo.away);
+    if(!h||!a)return;
+    const sh=+r.sh,sa=+r.sa;
+    h.j++;a.j++;h.gp+=sh;h.gc+=sa;a.gp+=sa;a.gc+=sh;
+    if(sh>sa){h.v++;h.pts+=3;a.d++;}else if(sh===sa){h.e++;a.e++;h.pts++;a.pts++;}else{a.v++;a.pts+=3;h.d++;}
+  });
+  teams.forEach(t=>t.sg=t.gp-t.gc);
+  // confronto direto entre equipes empatadas
+  function h2hPts(ta, tb) {
+    let pts=0;
+    JOGOS.filter(j=>j.g===g&&((j.home===ta.name&&j.away===tb.name)||(j.home===tb.name&&j.away===ta.name))).forEach(j=>{
+      const r=S.results[j.id]; if(!r) return;
+      const sh=+r.sh,sa=+r.sa;
+      if(j.home===ta.name){if(sh>sa)pts+=3;else if(sh===sa)pts+=1;}
+      else{if(sa>sh)pts+=3;else if(sa===sh)pts+=1;}
+    });
+    return pts;
+  }
+  return teams.sort((a,b)=>{
+    if(b.pts!==a.pts) return b.pts-a.pts;
+    if(b.sg!==a.sg) return b.sg-a.sg;
+    if(b.gp!==a.gp) return b.gp-a.gp;
+    // confronto direto
+    const h2ha=h2hPts(a,b), h2hb=h2hPts(b,a);
+    return h2hb-h2ha;
+  });
+}
+
+// ----------------------------------------
+// JOGOS & ANÁLISE
+// ----------------------------------------
+let jTab='A';
+function renderJogos(){
+  document.getElementById('jtabs').innerHTML=Object.keys(GR).map(g=>
+    `<button class="tab ${g===jTab?'on':''}" onclick="jTab='${g}';renderJogos()">${g}</button>`
+  ).join('');
+  const js=JOGOS.filter(j=>j.g===jTab);
+  const byDay={};
+  js.forEach(j=>{(byDay[j.date]=byDay[j.date]||[]).push(j);});
+  document.getElementById('jcontent').innerHTML=Object.keys(byDay).sort().map(date=>{const games=byDay[date];return `<div class="day-div"><span class="day-label">${fmtDay(date)}</span><span class="day-line"></span><span class="day-count">${games.length} jogos</span></div>`+games.sort((a,b)=>a.brt.localeCompare(b.brt)).map(j=>matchCard(j,true,false)).join('');}).join('');
+}
+
+// ----------------------------------------
+// ARTILHEIROS
+// ----------------------------------------
+// ----------------------------------------
+// IA ANÁLISE
+// ----------------------------------------
+let iaHistorico = [];
+
+function formatarAnaliseIA(texto){
+  if(!texto) return '';
+  // Limpar markdown
+  let t=texto;
+  // Processar linha por linha
+  const lines=t.split('\n');
+  let html='';
+  let inMercados=false;
+
+  for(let i=0;i<lines.length;i++){
+    let l=lines[i].trim();
+    if(!l){html+='<div style="height:6px"></div>';continue;}
+
+    // Remove ** bold markers para processar
+    const boldClean=l.replace(/\*\*([^*]+)\*\*/g,'$1');
+
+    // TÍTULO DE SEÇÃO (## ou linha em caps)
+    if(l.startsWith('##')||l.startsWith('**ANÁLISE')||l.startsWith('**MERCADOS')){
+      const title=boldClean.replace(/^#+\s*/,'').replace(/:/,'').trim();
+      inMercados=title.toUpperCase().includes('MERCADO');
+      html+=`<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;color:var(--acc);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 6px;border-bottom:1px solid var(--bd);padding-bottom:4px">${title}</div>`;
+      continue;
+    }
+
+    // MERCADOS NUMERADOS (1. **LAY...**)
+    const mercMatch=l.match(/^(\d+)\.\s+\*\*([^*]+)\*\*(.*)$/);
+    if(mercMatch||(/^(\d+)\./.test(l)&&(l.toLowerCase().includes('lay')||l.toLowerCase().includes('back')||l.toLowerCase().includes('over')||l.toLowerCase().includes('under')||l.toLowerCase().includes('btts')||l.toLowerCase().includes('handi')))){
+      const full=boldClean.replace(/^\d+\.\s*/,'');
+      const parts=full.split(' - ');
+      const mercName=parts[0].trim();
+      const desc=parts.slice(1).join(' - ').trim();
+      // Detectar se tem odd (@X.XX)
+      const oddMatch=mercName.match(/@([\d.]+)/);
+      const oddVal=oddMatch?oddMatch[1]:'';
+      const mercLabel=mercName.replace(/@[\d.]+/,'').trim();
+      // Cor por tipo
+      const isLay=mercLabel.toUpperCase().includes('LAY');
+      const isBack=mercLabel.toUpperCase().includes('BACK');
+      const cor=isLay?'var(--red)':isBack?'var(--grn)':'var(--acc)';
+      const bgCor=isLay?'rgba(245,70,61,.08)':isBack?'rgba(34,217,122,.08)':'rgba(200,241,53,.06)';
+      // Detectar confiança
+      const confMatch=desc.match(/confiança[:\s]+(alto|médio|baixo)/i);
+      const conf=confMatch?confMatch[1].toLowerCase():'';
+      const confCor=conf==='alto'?'var(--grn)':conf==='médio'?'var(--acc3)':'var(--tx3)';
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${bgCor};border:1px solid ${cor}22;border-left:3px solid ${cor};border-radius:5px;margin-bottom:5px">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:${cor};text-transform:uppercase;flex-shrink:0">${mercLabel}</span>
+        ${oddVal?`<span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:${cor};background:${cor}22;border-radius:4px;padding:1px 8px;flex-shrink:0">@${oddVal}</span>`:''}
+        ${desc?`<span style="font-size:13px;color:var(--tx2);flex:1">${desc.replace(/confiança[:\s]+(alto|médio|baixo)/i,'').trim()}</span>`:''}
+        ${conf?`<span style="font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:${confCor};background:${confCor}22;border-radius:3px;padding:2px 7px;flex-shrink:0">${conf}</span>`:''}
+      </div>`;
+      continue;
+    }
+
+    // PLACAR SUGERIDO
+    if(l.toLowerCase().includes('placar')||l.toLowerCase().includes('resultado esperado')||l.toLowerCase().includes('previsão:')){
+      const clean=boldClean.replace(/^[-•]\s*/,'');
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(61,157,245,.08);border:1px solid rgba(61,157,245,.2);border-radius:5px;margin-bottom:5px">
+        <span style="font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:var(--blu)">Placar</span>
+        <span style="font-size:13px;color:var(--tx)">${clean}</span>
+      </div>`;
+      continue;
+    }
+
+    // NÍVEL DE CONFIANÇA GERAL
+    if(l.toLowerCase().includes('nível de confiança')||l.toLowerCase().includes('nivel de confianca')){
+      const clean=boldClean.replace(/^[-•]\s*/,'');
+      const isAlto=clean.toLowerCase().includes('alto');
+      const isMed=clean.toLowerCase().includes('médio')||clean.toLowerCase().includes('medio');
+      const cor=isAlto?'var(--grn)':isMed?'var(--acc3)':'var(--tx3)';
+      html+=`<div style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:${cor}15;border:1px solid ${cor}33;border-radius:5px;margin-top:8px">
+        <span style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;color:${cor}">${clean}</span>
+      </div>`;
+      continue;
+    }
+
+    // ODDS COM VALOR (linha com @ e "valor" ou "inflada")
+    if(l.includes('@')&&(l.toLowerCase().includes('valor')||l.toLowerCase().includes('inflad')||l.toLowerCase().includes('value'))){
+      const clean=boldClean.replace(/^[-•]\s*/,'');
+      html+=`<div style="padding:5px 10px;background:rgba(200,241,53,.06);border-left:2px solid var(--acc);border-radius:3px;font-size:13px;color:var(--acc);margin-bottom:3px">${clean}</div>`;
+      continue;
+    }
+
+    // LINHA NORMAL COM - ou •
+    if(l.startsWith('-')||l.startsWith('•')||l.startsWith('*')){
+      const clean=boldClean.replace(/^[-•*]\s*/,'');
+      html+=`<div style="font-size:13px;color:var(--tx2);padding:3px 0 3px 10px;border-left:1px solid var(--bd2)">${clean}</div>`;
+      continue;
+    }
+
+    // TEXTO NORMAL
+    const clean=boldClean;
+    html+=`<div style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:3px">${clean}</div>`;
+  }
+
+  return html;
+}
+
+function renderIA(){
+  const sel=document.getElementById('ia-jogo-sel');
+  const pendentes=JOGOS.filter(j=>!S.results[j.id]).sort((a,b)=>a.date.localeCompare(b.date)||a.brt.localeCompare(b.brt));
+  sel.innerHTML='<option value="">— selecione o jogo —</option>'+
+    pendentes.map(j=>`<option value="${j.id}">${fmtDay(j.date)} ${j.brt} · ${j.home} vs ${j.away} (G${j.g})</option>`).join('');
+  // Carregar API key salva
+  const savedKey=localStorage.getItem('copa26_apikey')||'';
+  const keyInput=document.getElementById('ia-apikey');
+  if(keyInput) keyInput.value=savedKey;
+  const keyBox=document.getElementById('ia-apikey-box');
+  if(keyBox) keyBox.style.borderColor=savedKey?'rgba(200,241,53,.2)':'rgba(245,70,61,.3)';
+  renderIAHistorico();
+}
+function salvarApiKey(){
+  const key=document.getElementById('ia-apikey').value.trim();
+  if(!key){alert('Cola a API key primeiro.');return;}
+  localStorage.setItem('copa26_apikey',key);
+  showToast('API key salva!');
+  document.getElementById('ia-apikey-box').style.borderColor='rgba(200,241,53,.2)';
+}
+
+function renderIAHistorico(){
+  const el=document.getElementById('ia-historico');
+  if(!iaHistorico.length){el.innerHTML='';return;}
+  el.innerHTML=iaHistorico.slice().reverse().map(h=>`
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:14px 18px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--tx);text-transform:uppercase">${h.titulo}</div>
+        <div style="font-size:10px;color:var(--tx3);font-family:'JetBrains Mono',monospace">${h.ts}</div>
+      </div>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.7">${formatarAnaliseIA(h.texto)}</div>
+    </div>
+  `).join('');
+}
+
+async function gerarAnaliseIA(){
+  const sel=document.getElementById('ia-jogo-sel');
+  const jogoId=sel.value;
+  if(!jogoId){alert('Selecione um jogo primeiro.');return;}
+  const jogo=JOGOS.find(j=>j.id===jogoId);
+  if(!jogo)return;
+
+  const stGrupo=calcSt(jogo.g);
+  const tabelaGrupo=stGrupo.map((t,i)=>`${i+1}. ${t.name}: ${t.pts}pts J${t.j} V${t.v} E${t.e} D${t.d} SG${t.sg>=0?'+'+t.sg:t.sg}`).join('\n');
+  const resultadosGrupo=JOGOS.filter(j=>j.g===jogo.g&&S.results[j.id]).map(j=>{
+    const r=S.results[j.id];
+    return j.home+' '+r.sh+'x'+r.sa+' '+j.away+(r.obs?' — "'+r.obs+'"':'');
+  }).join('\n');
+  const topArtilheiros=Object.entries(S.scorers).map(([n,d])=>({name:n,...d})).filter(p=>p.gols>0).sort((a,b)=>b.gols-a.gols).slice(0,5).map(p=>p.name+' ('+p.team+') '+p.gols+'G').join(', ');
+
+  const prompt='Você é Leozera, o maior trader esportivo do Brasil, especialista em futebol.\n\n'
+    +'JOGO: '+jogo.home+' vs '+jogo.away+'\n'
+    +'Grupo '+jogo.g+' | Rodada '+jogo.rd+' | '+fmtDay(jogo.date)+' às '+jogo.brt+' (Brasília)\n'
+    +'Estádio: '+jogo.est+', '+jogo.city+'\n'
+    +'Odds: Casa '+jogo.odds.h+' | Empate '+jogo.odds.e+' | Fora '+jogo.odds.a+'\n\n'
+    +'CLASSIFICAÇÃO ATUAL DO GRUPO '+jogo.g+':\n'+tabelaGrupo+'\n\n'
+    +(resultadosGrupo?'RESULTADOS JÁ REALIZADOS NO GRUPO:\n'+resultadosGrupo+'\n\n':'')
+    +(topArtilheiros?'TOP ARTILHEIROS: '+topArtilheiros+'\n\n':'')
+    +'Com base nesses dados reais, gere uma análise de trader profissional com:\n'
+    +'1. Momento atual de cada time (quem está bem, quem está sob pressão)\n'
+    +'2. O que está em jogo na classificação\n'
+    +'3. Onde está o valor nas odds (o mercado está certo ou errado?)\n'
+    +'4. 3 a 5 mercados para entrar: Back, Lay, Over, Under, BTTS, Handicap, Over HT, Escanteios\n'
+    +'5. Nível de confiança: alto / médio / baixo\n\n'
+    +'Estruture EXATAMENTE assim:\n'
+    +'## MOMENTO DOS TIMES\n'
+    +'## O QUE ESTÁ EM JOGO\n'
+    +'## ANÁLISE DAS ODDS\n'
+    +'## MERCADOS PARA ENTRAR\n'
+    +'(numere cada mercado: 1. **BACK/LAY + mercado @odd** - descrição - confiança: alto/médio/baixo)\n'
+    +'## PLACAR SUGERIDO\n'
+    +'(ex: Placar: Brasil 2x0 Escócia)\n'
+    +'## NÍVEL DE CONFIANÇA GERAL\n'
+    +'(alto/médio/baixo)\n\n'
+    +'Sem texto extra fora dessas seções. Direto, técnico, sem enrolação.';
+
+  document.getElementById('ia-loading').style.display='block';
+  document.getElementById('ia-resultado').style.display='none';
+  document.getElementById('ia-btn').disabled=true;
+  document.getElementById('ia-btn').textContent='Analisando...';
+
+  try{
+    const apiKey=localStorage.getItem('copa26_apikey')||'';
+    if(!apiKey){
+      alert('Configure sua API key Anthropic na aba IA antes de analisar.');
+      document.getElementById('ia-loading').style.display='none';
+      document.getElementById('ia-btn').disabled=false;
+      document.getElementById('ia-btn').textContent='Analisar';
+      return;
+    }
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await resp.json();
+    const texto=data.content&&data.content[0]?data.content[0].text:'Erro ao gerar análise.';
+    const titulo=jogo.home+' vs '+jogo.away;
+    const ts=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    iaHistorico.push({titulo,ts,texto});
+    // Mostrar apenas no histórico — evita duplicação
+    document.getElementById('ia-resultado').style.display='none';
+    renderIAHistorico();
+    // Scroll para o resultado
+    document.getElementById('ia-historico').scrollIntoView({behavior:'smooth'});
+  }catch(err){
+    document.getElementById('ia-texto').textContent='Erro: '+err.message;
+    document.getElementById('ia-resultado').style.display='block';
+  }finally{
+    document.getElementById('ia-loading').style.display='none';
+    document.getElementById('ia-btn').disabled=false;
+    document.getElementById('ia-btn').textContent='Analisar';
+  }
+}
+
+function renderArt(){
+  const sc=Object.entries(S.scorers).map(([n,d])=>({name:n,...d})).filter(p=>p.gols>0).sort((a,b)=>b.gols-a.gols||b.assists-a.assists||a.name.localeCompare(b.name)).slice(0,30);
+  const as=Object.entries(S.scorers).map(([n,d])=>({name:n,...d})).filter(p=>p.assists>0).sort((a,b)=>b.assists-a.assists||b.gols-a.gols||a.name.localeCompare(b.name)).slice(0,30);
+  const rkGols=sc.length?sc.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bd)">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${i<3?'var(--acc)':'var(--tx4)'};width:14px;text-align:center;flex-shrink:0">${i+1}</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;color:var(--tx);white-space:nowrap">${p.name}</span>
+      ${p.team?`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:11px;text-transform:uppercase;color:var(--acc2);white-space:nowrap">${p.team}</span>`:''}
+      ${p.assists?`<span style="font-size:10px;color:var(--tx3);white-space:nowrap">${p.assists}A</span>`:''}
+      <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--acc);margin-left:auto;flex-shrink:0">${p.gols}</span>
+    </div>
+  `).join(''):'<p style="color:var(--tx3);font-size:12px;padding:6px 0">Nenhum gol registrado</p>';
+
+  const rkAss=as.length?as.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bd)">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${i<3?'var(--acc)':'var(--tx4)'};width:14px;text-align:center;flex-shrink:0">${i+1}</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;color:var(--tx);white-space:nowrap">${p.name}</span>
+      ${p.team?`<span style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:11px;text-transform:uppercase;color:var(--blu);white-space:nowrap">${p.team}</span>`:''}
+      ${p.gols?`<span style="font-size:10px;color:var(--tx3);white-space:nowrap">${p.gols}G</span>`:''}
+      <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--grn);margin-left:auto;flex-shrink:0">${p.assists}</span>
+    </div>
+  `).join(''):'<p style="color:var(--tx3);font-size:12px;padding:6px 0">Nenhuma assistência registrada</p>';
+
+  document.getElementById('rk-g').innerHTML=rkGols;
+  document.getElementById('rk-a').innerHTML=rkAss;
+}
+
+// ----------------------------------------
+// MODAL
+// ----------------------------------------
+let curId=null,gRows=[];
+function openM(id){
+  curId=id;
+  const j=JOGOS.find(x=>x.id===id);
+  const r=S.results[id];
+  document.getElementById('mtit').innerHTML=`${fi(j.home,20,15)} ${j.home} vs ${fi(j.away,20,15)} ${j.away}`;
+  document.getElementById('lh').textContent=j.home;
+  document.getElementById('la').textContent=j.away;
+  document.getElementById('sh').value=r?r.sh:0;
+  document.getElementById('sa').value=r?r.sa:0;
+  document.getElementById('obs').value=r?r.obs:'';
+  document.getElementById('dev').value=r?r.dev:'';
+  gRows=r?JSON.parse(JSON.stringify(r.goals||[])):[]; renderGR();
+  document.getElementById('mbg').classList.add('open');
+}
+function closeM(){document.getElementById('mbg').classList.remove('open');curId=null;gRows=[];}
+function renderGR(){
+  const j=JOGOS.find(x=>x.id===curId);
+  const hName=j?j.home:'Casa';
+  const aName=j?j.away:'Fora';
+  const hdr=gRows.length?`<div class="gi-hdr">
+    <span style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;font-family:'Barlow Condensed',sans-serif;font-weight:700">Time</span>
+    <span style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;font-family:'Barlow Condensed',sans-serif;font-weight:700">Jogador</span>
+    <span style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;font-family:'Barlow Condensed',sans-serif;font-weight:700">Assistência</span>
+    <span style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;font-family:'Barlow Condensed',sans-serif;font-weight:700">Min.</span>
+    <span></span>
+  </div>`:'';
+  document.getElementById('glist').innerHTML=hdr+gRows.map((g,i)=>`
+    <div class="gi">
+      <select class="finp" style="padding:6px 8px;font-size:12px" onchange="gRows[${i}].team=this.value;gRows[${i}].teamName=this.value==='home'?'${hName}':'${aName}'">
+        <option value="" ${!g.team?'selected':''}>— time —</option>
+        <option value="home" ${g.team==='home'?'selected':''}>${hName}</option>
+        <option value="away" ${g.team==='away'?'selected':''}>${aName}</option>
+      </select>
+      <input class="finp" style="padding:7px 10px;font-size:12px" placeholder="Jogador" value="${g.p||''}" oninput="gRows[${i}].p=this.value">
+      <input class="finp" style="padding:7px 10px;font-size:12px" placeholder="Assistência" value="${g.a||''}" oninput="gRows[${i}].a=this.value">
+      <input class="finp" style="padding:7px 8px;font-size:12px;text-align:center" placeholder="90" type="number" min="1" max="120" value="${g.min||''}" oninput="gRows[${i}].min=this.value">
+      <button class="rm-g" onclick="gRows.splice(${i},1);renderGR()">✕</button>
+    </div>
+  `).join('');
+  // restaurar selects após render
+  document.querySelectorAll('.gi select').forEach((sel,i)=>{
+    if(gRows[i]&&gRows[i].team) sel.value=gRows[i].team;
+  });
+}
+function addG(){gRows.push({p:'',a:'',team:'',teamName:'',min:''});renderGR();}
+function saveR(){
+  const j2=JOGOS.find(x=>x.id===curId);
+  // Capturar estado atual do DOM para cada gol
+  const items=document.querySelectorAll('.gi');
+  const savedRows=[];
+  items.forEach((row,i)=>{
+    const ins=row.querySelectorAll('input');
+    const sel=row.querySelector('select');
+    const team=sel?sel.value:(gRows[i]?gRows[i].team:'');
+    const teamName=team==='home'?(j2?j2.home:''):(team==='away'?(j2?j2.away:''):'');
+    savedRows.push({
+      p:ins[0]?ins[0].value.trim():(gRows[i]?gRows[i].p:''),
+      a:ins[1]?ins[1].value.trim():(gRows[i]?gRows[i].a:''),
+      team,teamName,
+      min:ins[2]?ins[2].value.trim():(gRows[i]?gRows[i].min:'')
+    });
+  });
+  gRows=savedRows;
+  const prev=S.results[curId];
+  if(prev?.goals)prev.goals.forEach(g=>{
+    if(g.p&&S.scorers[g.p])S.scorers[g.p].gols=Math.max(0,(S.scorers[g.p].gols||0)-1);
+    if(g.a&&S.scorers[g.a])S.scorers[g.a].assists=Math.max(0,(S.scorers[g.a].assists||0)-1);
+  });
+  gRows.forEach(g=>{
+    if(!g.p)return;
+    if(!S.scorers[g.p])S.scorers[g.p]={gols:0,assists:0,team:g.teamName||''};
+    S.scorers[g.p].gols=(S.scorers[g.p].gols||0)+1;
+    S.scorers[g.p].team=g.teamName||S.scorers[g.p].team;
+    if(g.a){if(!S.scorers[g.a])S.scorers[g.a]={gols:0,assists:0,team:g.teamName||''};S.scorers[g.a].assists=(S.scorers[g.a].assists||0)+1;S.scorers[g.a].team=S.scorers[g.a].team||g.teamName||'';}
+  });
+  S.results[curId]={sh:+document.getElementById('sh').value||0,sa:+document.getElementById('sa').value||0,goals:gRows,obs:document.getElementById('obs').value.trim(),dev:document.getElementById('dev').value};
+  save();closeM();showToast('Salvo!');
+  // Atualizar contador global sempre
+  document.getElementById('top-badge').textContent=Object.keys(S.results).length+'/72 jogos';
+  const ap=document.querySelector('.pg.on');if(ap)render(ap.id.replace('pg-',''));
+}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+document.getElementById('mbg').addEventListener('click',function(e){if(e.target===this)closeM();});
+function resetAll(){
+  // Modal customizado — confirm() pode ser bloqueado em file://
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+  overlay.innerHTML=`<div style="background:#181c24;border:1px solid rgba(245,70,61,.4);border-radius:12px;padding:28px 32px;max-width:380px;text-align:center">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;color:#f5463d;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Resetar dados?</div>
+    <div style="font-size:13px;color:#9aa5c0;line-height:1.6;margin-bottom:20px">Todos os resultados, gols e assistências registrados serão apagados. Esta ação não pode ser desfeita.</div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button id="reset-confirm" style="background:#f5463d;color:#fff;border:none;border-radius:7px;padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.06em;cursor:pointer">Sim, resetar</button>
+      <button id="reset-cancel" style="background:transparent;color:#9aa5c0;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;cursor:pointer">Cancelar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('reset-cancel').onclick=()=>overlay.remove();
+  document.getElementById('reset-confirm').onclick=()=>{
+    overlay.remove();
+    localStorage.removeItem('copa26l10');
+    S={results:{},scorers:{}};
+    renderDash();
+    showToast('Dados resetados!');
+  };
+}
+// Versão do schema — se mudou, reseta dados corrompidos/antigos
+const SCHEMA_VER='2026v2';
+if(localStorage.getItem('copa26l10_ver')!==SCHEMA_VER){
+  localStorage.removeItem('copa26l10');
+  localStorage.setItem('copa26l10_ver',SCHEMA_VER);
+  S={results:{},scorers:{}};
+} else {
+  load();
+}
+const _td=document.getElementById('top-date');if(_td)_td.textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+renderDash();
+</script>
+</body>
+</html>
