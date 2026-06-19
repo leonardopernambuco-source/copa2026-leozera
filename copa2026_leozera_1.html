@@ -199,6 +199,30 @@ body{background:var(--bg);color:var(--tx);font-family:'Barlow',sans-serif;font-s
 .toast.show{opacity:1;transform:translateY(0)}
 
 /* ── SCROLL ──────────────────────────────── */
+
+/* MATA-MATA */
+.bracket-wrap{overflow-x:auto;padding-bottom:16px}
+.bracket{display:flex;gap:0;align-items:flex-start;min-width:900px}
+.bracket-round{display:flex;flex-direction:column;flex:1;min-width:180px}
+.bracket-round-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc);text-align:center;padding:8px 0 12px;border-bottom:1px solid var(--bd);margin-bottom:12px}
+.bracket-matches{display:flex;flex-direction:column;justify-content:space-around;flex:1;gap:8px}
+.bm{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);overflow:hidden;margin:0 6px;transition:border-color .15s;position:relative}
+.bm:hover{border-color:var(--bd3)}
+.bm.live{border-color:var(--acc-glow)}
+.bm-team{display:flex;align-items:center;gap:6px;padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;color:var(--tx2);border-bottom:1px solid var(--bd)}
+.bm-team:last-child{border-bottom:none}
+.bm-team.winner{color:var(--tx);background:rgba(200,241,53,.04)}
+.bm-team.tbd{color:var(--tx4);font-style:italic;font-weight:400;font-size:11px}
+.bm-score{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;margin-left:auto;color:var(--acc)}
+.bm-slot{font-size:9px;color:var(--tx3);font-family:'JetBrains Mono',monospace;min-width:28px}
+.bm-label{position:absolute;top:2px;right:4px;font-size:8px;color:var(--tx4);font-family:'JetBrains Mono',monospace}
+.bracket-connector{display:flex;align-items:center;justify-content:center;width:12px;flex-shrink:0}
+/* Melhores terceiros */
+.terceiros-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;margin-bottom:16px}
+.t3-card{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r6);padding:8px 10px}
+.t3-pos{font-size:9px;color:var(--acc);font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.t3-team{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--tx);text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.t3-pts{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--tx3)}
 .main::-webkit-scrollbar{width:4px}.main::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
 
 @media(max-width:768px){
@@ -295,6 +319,10 @@ body{background:var(--bg);color:var(--tx);font-family:'Barlow',sans-serif;font-s
     <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
     <span class="ni-lbl">Artil.</span>
   </div>
+  <div class="ni" onclick="nav('mata')" title="Mata-Mata">
+    <svg viewBox="0 0 24 24"><path d="M8 6l4-4 4 4M8 18l4 4 4-4M3 12h4M17 12h4M12 8v8"/></svg>
+    <span class="ni-lbl">Mata</span>
+  </div>
 
 </div>
 
@@ -330,6 +358,12 @@ body{background:var(--bg);color:var(--tx);font-family:'Barlow',sans-serif;font-s
   <div class="ph"><div class="ph-title">Jogos & Análise</div><div class="ph-sub">todos os resultados + leitura trader</div></div>
   <div class="tabs" id="jtabs"></div>
   <div id="jcontent"></div>
+</div>
+
+<!-- ══ MATA-MATA ══ -->
+<div id="pg-mata" class="pg">
+  <div class="ph"><div class="ph-title">Mata-Mata</div><div class="ph-sub">chaveamento automático conforme classificação dos grupos</div></div>
+  <div id="mata-content"></div>
 </div>
 
 <!-- ══ ARTILHEIROS ══ -->
@@ -608,6 +642,7 @@ function render(id){
   if(id==='grupos')renderGrupos();
   if(id==='jogos')renderJogos();
   if(id==='art')renderArt();
+  if(id==='mata')renderMata();
 }
 
 // ----------------------------------------
@@ -965,6 +1000,266 @@ function renderJogos(){
 // ----------------------------------------
 let iaHistorico = [];
 
+
+// ═══════════════════════════════════════════
+// MATA-MATA
+// Regras FIFA 2026: 12 grupos x 4 times
+// 1º e 2º de cada grupo = 24 classificados
+// 8 melhores 3ºs colocados = 8 classificados
+// Total: 32 times no mata-mata
+// ═══════════════════════════════════════════
+
+function getMelhoresGrupos(){
+  // Retorna objeto {grupo: {1: time, 2: time, 3: time}}
+  const result={};
+  Object.keys(GR).forEach(g=>{
+    const st=calcSt(g);
+    result[g]={1:st[0],2:st[1],3:st[2],4:st[3]};
+  });
+  return result;
+}
+
+function getMelhoresTerceiros(){
+  // Pega todos os 3ºs colocados e ordena pelos critérios FIFA
+  // Critérios entre 3ºs: pts > sg > gp > fair play (simplificado)
+  const todos=Object.keys(GR).map(g=>{
+    const st=calcSt(g);
+    const t=st[2];
+    return t?{...t,grupo:g}:null;
+  }).filter(Boolean);
+
+  return todos
+    .sort((a,b)=>b.pts-a.pts||b.sg-a.sg||b.gp-a.gp||a.name.localeCompare(b.name))
+    .slice(0,8);
+}
+
+// Chaveamento oficial FIFA 2026 — 32 times, 8 partidas de oitavas
+// Baseado no sorteio de chaveamento da FIFA para Copa 2026
+// As oitavas cruzam grupos específicos conforme o chaveamento oficial
+function getChaveamento(){
+  const g=getMelhoresGrupos();
+  const t3=getMelhoresTerceiros();
+  const t3map={};
+  t3.forEach((t,i)=>t3map[i]=t);
+
+  // Função helper para nome/flag com fallback
+  const tm=(t)=>t?t.name:'A definir';
+  const jgsHave=(grp)=>JOGOS.filter(j=>j.g===grp&&S.results[j.id]).length===6;
+
+  // Resultado de um jogo do mata-mata (ainda não temos esses dados)
+  // Por ora mostramos apenas o chaveamento com os classificados
+  // Conforme regra FIFA 2026 (32 times, chaveamento por zonas):
+  const oitavas=[
+    {id:'O1', slot1:{label:'1A', time:g['A']?.[1]}, slot2:{label:'2C', time:g['C']?.[2]}},
+    {id:'O2', slot1:{label:'1C', time:g['C']?.[1]}, slot2:{label:'2A', time:g['A']?.[2]}},
+    {id:'O3', slot1:{label:'1B', time:g['B']?.[1]}, slot2:{label:'2D', time:g['D']?.[2]}},
+    {id:'O4', slot1:{label:'1D', time:g['D']?.[1]}, slot2:{label:'2B', time:g['B']?.[2]}},
+    {id:'O5', slot1:{label:'1E', time:g['E']?.[1]}, slot2:{label:'2G', time:g['G']?.[2]}},
+    {id:'O6', slot1:{label:'1G', time:g['G']?.[1]}, slot2:{label:'2E', time:g['E']?.[2]}},
+    {id:'O7', slot1:{label:'1F', time:g['F']?.[1]}, slot2:{label:'2H', time:g['H']?.[2]}},
+    {id:'O8', slot1:{label:'1H', time:g['H']?.[1]}, slot2:{label:'2F', time:g['F']?.[2]}},
+    {id:'O9', slot1:{label:'1I', time:g['I']?.[1]}, slot2:{label:'2K', time:g['K']?.[2]}},
+    {id:'O10',slot1:{label:'1K', time:g['K']?.[1]}, slot2:{label:'2I', time:g['I']?.[2]}},
+    {id:'O11',slot1:{label:'1J', time:g['J']?.[1]}, slot2:{label:'2L', time:g['L']?.[2]}},
+    {id:'O12',slot1:{label:'1L', time:g['L']?.[1]}, slot2:{label:'2J', time:g['J']?.[2]}},
+    {id:'O13',slot1:{label:'3º melhor', time:t3map[0]}, slot2:{label:'3º melhor', time:t3map[1]}},
+    {id:'O14',slot1:{label:'3º melhor', time:t3map[2]}, slot2:{label:'3º melhor', time:t3map[3]}},
+    {id:'O15',slot1:{label:'3º melhor', time:t3map[4]}, slot2:{label:'3º melhor', time:t3map[5]}},
+    {id:'O16',slot1:{label:'3º melhor', time:t3map[6]}, slot2:{label:'3º melhor', time:t3map[7]}},
+  ];
+
+  // Resultados do mata-mata salvos no localStorage
+  const mmResults=S.mmResults||{};
+
+  return {oitavas, mmResults};
+}
+
+function bmCard(jogo, mmResults){
+  const r=mmResults[jogo.id]||null;
+  const s1=jogo.slot1;
+  const s2=jogo.slot2;
+  const t1=s1.time;
+  const t2=s2.time;
+  const tbd='<span class="bm-team tbd"><span class="bm-slot">?</span>A definir</span>';
+
+  const teamRow=(t, slot, isHome)=>{
+    if(!t) return tbd;
+    const won=r&&((isHome&&r.sh>r.sa)||((!isHome)&&r.sa>r.sh));
+    const sh=r?(isHome?r.sh:r.sa):'';
+    return `<div class="bm-team ${won?'winner':''}">
+      ${fi(t.name,16,12)}
+      <span class="bm-slot" style="color:var(--tx4);font-size:9px">${slot}</span>
+      <span style="flex:1">${t.name}</span>
+      ${r?`<span class="bm-score">${sh}</span>`:''}
+    </div>`;
+  };
+
+  const regBtn=`<button onclick="openMM('${jogo.id}')" style="font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:${r?'rgba(61,245,168,.08)':'rgba(200,241,53,.1)'};color:${r?'var(--acc2)':'var(--acc)'};border:1px solid ${r?'rgba(61,245,168,.2)':'rgba(200,241,53,.2)'};border-radius:3px;padding:2px 7px;cursor:pointer;display:block;width:calc(100% - 12px);margin:4px 6px">${r?'editar':'registrar'}</button>`;
+
+  return `<div class="bm ${r?'':''}">
+    <span class="bm-label">${jogo.id}</span>
+    ${teamRow(t1,s1.label,true)}
+    ${teamRow(t2,s2.label,false)}
+    ${(t1&&t2)?regBtn:''}
+  </div>`;
+}
+
+function openMM(id){
+  // Salva resultado do mata-mata
+  const sh=prompt('Gols time 1 (incluindo pênaltis se houver):');
+  if(sh===null) return;
+  const sa=prompt('Gols time 2 (incluindo pênaltis se houver):');
+  if(sa===null) return;
+  const pen=confirm('Decidido nos pênaltis?');
+  if(!S.mmResults) S.mmResults={};
+  S.mmResults[id]={sh:+sh,sa:+sa,pen};
+  save();
+  showToast('Resultado salvo!');
+  renderMata();
+}
+
+function renderMata(){
+  const el=document.getElementById('mata-content');
+  if(!el) return;
+
+  const {oitavas,mmResults}=getChaveamento();
+  const t3=getMelhoresTerceiros();
+  const grupos=getMelhoresGrupos();
+
+  // Status dos grupos
+  const gruposCompletos=Object.keys(GR).filter(g=>JOGOS.filter(j=>j.g===g&&S.results[j.id]).length===6).length;
+  const totalGrupos=12;
+
+  // Melhores terceiros — mostrar só se houver dados
+  const t3Html=t3.length?`
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:12px 16px;margin-bottom:16px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;color:var(--acc);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">
+        Melhores terceiros — ${t3.length}/8 definidos
+      </div>
+      <div class="terceiros-grid">
+        ${t3.map((t,i)=>`
+          <div class="t3-card">
+            <div class="t3-pos">${i+1}º melhor</div>
+            <div class="t3-team">${fi(t.name,16,12)}${t.name}</div>
+            <div class="t3-pts">G${t.grupo} · ${t.pts}pts · SG${t.sg>=0?'+'+t.sg:t.sg}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `:'';
+
+  // Status geral
+  const statusHtml=`
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <div style="font-size:12px;color:var(--tx2)">
+          <span style="color:var(--acc);font-family:'JetBrains Mono',monospace;font-weight:600">${gruposCompletos}/${totalGrupos}</span> grupos concluídos
+          ${gruposCompletos<totalGrupos?` — chaveamento parcial, times com <span style="color:var(--tx4)">A definir</span> ainda não classificados`:'— chaveamento completo'}
+        </div>
+      </div>
+      <div style="height:4px;width:160px;background:var(--s3);border-radius:2px;flex-shrink:0">
+        <div style="width:${Math.round(gruposCompletos/totalGrupos*100)}%;height:100%;background:var(--acc);border-radius:2px"></div>
+      </div>
+    </div>
+  `;
+
+  // Oitavas em grid 4x4
+  const oitHtml=`
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:14px 16px;margin-bottom:14px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:var(--acc);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Oitavas de final</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        ${oitavas.map(j=>bmCard(j,mmResults)).join('')}
+      </div>
+    </div>
+  `;
+
+  // Quartas (times vencedores das oitavas)
+  const quartasData=[
+    {id:'Q1',slot1:{label:'Venc. O1',time:getVenc(oitavas[0],mmResults)},slot2:{label:'Venc. O2',time:getVenc(oitavas[1],mmResults)}},
+    {id:'Q2',slot1:{label:'Venc. O3',time:getVenc(oitavas[2],mmResults)},slot2:{label:'Venc. O4',time:getVenc(oitavas[3],mmResults)}},
+    {id:'Q3',slot1:{label:'Venc. O5',time:getVenc(oitavas[4],mmResults)},slot2:{label:'Venc. O6',time:getVenc(oitavas[5],mmResults)}},
+    {id:'Q4',slot1:{label:'Venc. O7',time:getVenc(oitavas[6],mmResults)},slot2:{label:'Venc. O8',time:getVenc(oitavas[7],mmResults)}},
+    {id:'Q5',slot1:{label:'Venc. O9',time:getVenc(oitavas[8],mmResults)},slot2:{label:'Venc. O10',time:getVenc(oitavas[9],mmResults)}},
+    {id:'Q6',slot1:{label:'Venc. O11',time:getVenc(oitavas[10],mmResults)},slot2:{label:'Venc. O12',time:getVenc(oitavas[11],mmResults)}},
+    {id:'Q7',slot1:{label:'Venc. O13',time:getVenc(oitavas[12],mmResults)},slot2:{label:'Venc. O14',time:getVenc(oitavas[13],mmResults)}},
+    {id:'Q8',slot1:{label:'Venc. O15',time:getVenc(oitavas[14],mmResults)},slot2:{label:'Venc. O16',time:getVenc(oitavas[15],mmResults)}},
+  ];
+
+  const quartHtml=`
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:14px 16px;margin-bottom:14px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:var(--acc);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Quartas de final</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        ${quartasData.map(j=>bmCard(j,mmResults)).join('')}
+      </div>
+    </div>
+  `;
+
+  // Semis
+  const semisData=[
+    {id:'S1',slot1:{label:'Venc. Q1',time:getVenc(quartasData[0],mmResults)},slot2:{label:'Venc. Q2',time:getVenc(quartasData[1],mmResults)}},
+    {id:'S2',slot1:{label:'Venc. Q3',time:getVenc(quartasData[2],mmResults)},slot2:{label:'Venc. Q4',time:getVenc(quartasData[3],mmResults)}},
+    {id:'S3',slot1:{label:'Venc. Q5',time:getVenc(quartasData[4],mmResults)},slot2:{label:'Venc. Q6',time:getVenc(quartasData[5],mmResults)}},
+    {id:'S4',slot1:{label:'Venc. Q7',time:getVenc(quartasData[6],mmResults)},slot2:{label:'Venc. Q8',time:getVenc(quartasData[7],mmResults)}},
+  ];
+
+  const semisHtml=`
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:14px 16px;margin-bottom:14px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:var(--acc);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Semifinais</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        ${semisData.map(j=>bmCard(j,mmResults)).join('')}
+      </div>
+    </div>
+  `;
+
+  // Final e 3º lugar
+  const finalData={id:'F',slot1:{label:'Venc. S1+S2',time:getVenc(semisData[0],mmResults)||getVenc(semisData[1],mmResults)},slot2:{label:'Venc. S3+S4',time:getVenc(semisData[2],mmResults)||getVenc(semisData[3],mmResults)}};
+  const terceiroData={id:'T',slot1:{label:'Perd. Semi',time:getPerd(semisData[0],mmResults)||getPerd(semisData[1],mmResults)},slot2:{label:'Perd. Semi',time:getPerd(semisData[2],mmResults)||getPerd(semisData[3],mmResults)}};
+
+  const finalHtml=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="background:var(--s2);border:1px solid rgba(200,241,53,.2);border-radius:var(--r8);padding:14px 16px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:var(--acc);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🏆 Final</div>
+        ${bmCard(finalData,mmResults)}
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:var(--r8);padding:14px 16px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">3º lugar</div>
+        ${bmCard(terceiroData,mmResults)}
+      </div>
+    </div>
+  `;
+
+  // Campeão
+  const campeao=getVenc(finalData,mmResults);
+  const campeaoHtml=campeao?`
+    <div style="background:rgba(200,241,53,.06);border:1px solid var(--acc-glow);border-radius:var(--r8);padding:20px;text-align:center;margin-bottom:14px">
+      <div style="font-size:11px;color:var(--acc);font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Campeão do Mundo 2026</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px">
+        ${fi(campeao.name,40,30)}
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:32px;color:var(--acc);text-transform:uppercase;letter-spacing:.04em">${campeao.name}</span>
+      </div>
+    </div>
+  `:'';
+
+  el.innerHTML=campeaoHtml+statusHtml+t3Html+oitHtml+quartHtml+semisHtml+finalHtml;
+}
+
+function getVenc(jogo,mmResults){
+  if(!jogo) return null;
+  const r=mmResults[jogo.id];
+  if(!r) return null;
+  if(r.sh>r.sa) return jogo.slot1.time;
+  if(r.sa>r.sh) return jogo.slot2.time;
+  return null; // empate não deve acontecer no mata-mata
+}
+
+function getPerd(jogo,mmResults){
+  if(!jogo) return null;
+  const r=mmResults[jogo.id];
+  if(!r) return null;
+  if(r.sh>r.sa) return jogo.slot2.time;
+  if(r.sa>r.sh) return jogo.slot1.time;
+  return null;
+}
 
 function renderArt(){
   const sc=Object.entries(S.scorers).map(([n,d])=>({name:n,...d})).filter(p=>p.gols>0).sort((a,b)=>b.gols-a.gols||b.assists-a.assists||a.name.localeCompare(b.name)).slice(0,30);
